@@ -12,8 +12,8 @@ interface SubmitButtonProps {
 export function SubmitButton({
   idleText,
   pendingText,
-  className,
-  disabled = false
+  className = "",
+  disabled = false,
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
 
@@ -21,7 +21,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={pending || disabled}
-      className={className}
+      className={`inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium text-white ${className}`}
     >
       {pending ? pendingText : idleText}
     </button>
