@@ -57,9 +57,9 @@ export interface DashboardData {
   kpi: DashboardKpi;
   charts: {
     byYear: DashboardChartItem[];
+    byYearParticipants: DashboardChartItem[];
     byProject: DashboardChartItem[];
-    completionByProject: DashboardChartItem[];
-    byManager: DashboardChartItem[];
+    byProjectParticipants: DashboardChartItem[];
   };
   lists: {
     scheduled: DashboardProgramListItem[];
@@ -91,11 +91,7 @@ export async function getDashboardData(
 ): Promise<DashboardData> {
   const supabase = createSupabaseServerClient();
 
-  const [
-    projectsResult,
-    programsResult,
-    auditLogsResult
-  ] = await Promise.all([
+  const [projectsResult, programsResult, auditLogsResult] = await Promise.all([
     supabase
       .from("projects")
       .select("*")
@@ -214,37 +210,43 @@ export async function getDashboardData(
   };
 
   const byYearMap = new Map<string, number>();
+  const byYearParticipantsMap = new Map<string, number>();
   const byProjectMap = new Map<string, number>();
-  const completionByProjectMap = new Map<string, number>();
-  const byManagerMap = new Map<string, number>();
+  const byProjectParticipantsMap = new Map<string, number>();
 
   for (const program of filteredPrograms) {
     const yearKey = String(program.project_year);
-    byYearMap.set(yearKey, (byYearMap.get(yearKey) ?? 0) + 1);
-
     const projectKey = program.project_name;
-    byProjectMap.set(projectKey, (byProjectMap.get(projectKey) ?? 0) + 1);
-    completionByProjectMap.set(
-      projectKey,
-      (completionByProjectMap.get(projectKey) ?? 0) + toNumber(program.completion_count)
+    const completionCount = toNumber(program.completion_count);
+
+    byYearMap.set(yearKey, (byYearMap.get(yearKey) ?? 0) + 1);
+    byYearParticipantsMap.set(
+      yearKey,
+      (byYearParticipantsMap.get(yearKey) ?? 0) + completionCount
     );
 
-    const managerKey = program.manager_name;
-    byManagerMap.set(managerKey, (byManagerMap.get(managerKey) ?? 0) + 1);
+    byProjectMap.set(projectKey, (byProjectMap.get(projectKey) ?? 0) + 1);
+    byProjectParticipantsMap.set(
+      projectKey,
+      (byProjectParticipantsMap.get(projectKey) ?? 0) + completionCount
+    );
   }
 
   const charts = {
     byYear: sortChartDesc(
       Array.from(byYearMap.entries()).map(([name, value]) => ({ name, value }))
     ),
+    byYearParticipants: sortChartDesc(
+      Array.from(byYearParticipantsMap.entries()).map(([name, value]) => ({ name, value }))
+    ),
     byProject: sortChartDesc(
       Array.from(byProjectMap.entries()).map(([name, value]) => ({ name, value }))
     ),
-    completionByProject: sortChartDesc(
-      Array.from(completionByProjectMap.entries()).map(([name, value]) => ({ name, value }))
-    ),
-    byManager: sortChartDesc(
-      Array.from(byManagerMap.entries()).map(([name, value]) => ({ name, value }))
+    byProjectParticipants: sortChartDesc(
+      Array.from(byProjectParticipantsMap.entries()).map(([name, value]) => ({
+        name,
+        value
+      }))
     )
   };
 
