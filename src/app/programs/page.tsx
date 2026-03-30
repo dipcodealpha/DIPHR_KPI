@@ -1,0 +1,163 @@
+import Link from "next/link";
+import { PageTitle } from "@/components/ui/page-title";
+import { MessageBox } from "@/components/ui/message-box";
+import { listPrograms } from "@/lib/programs";
+import { buildCsv, buildDataUrl } from "@/lib/csv";
+import { formatDate, formatDateTime, getProgramStatus } from "@/lib/format";
+
+interface ProgramsPageProps {
+  searchParams?: Promise<{
+    success?: string;
+  }>;
+}
+
+function getSuccessMessage(success?: string) {
+  if (success === "created") {
+    return "교육이 등록되었습니다.";
+  }
+
+  if (success === "updated") {
+    return "교육 정보가 수정되었습니다.";
+  }
+
+  return "";
+}
+
+export default async function ProgramsPage({ searchParams }: ProgramsPageProps) {
+  try {
+    const resolvedSearchParams = searchParams ? await searchParams : {};
+    const successMessage = getSuccessMessage(resolvedSearchParams.success);
+    const programs = await listPrograms();
+
+    const csvRows = programs.map((program) => ({
+      연도: program.project_year ?? "",
+      사업명: program.project_name ?? "",
+      교육명: program.program_name,
+      시작일: formatDate(program.start_date),
+      종료일: formatDate(program.end_date),
+      교육시수: program.hours,
+      수료자수: program.completion_count ?? "",
+      상태: getProgramStatus(program.completion_count),
+      담당자명: program.manager_name,
+      최종수정자명: program.updated_by_name ?? "",
+      최종수정일: formatDateTime(program.updated_at)
+    }));
+
+    const csv = buildCsv(csvRows, [
+      "연도",
+      "사업명",
+      "교육명",
+      "시작일",
+      "종료일",
+      "교육시수",
+      "수료자수",
+      "상태",
+      "담당자명",
+      "최종수정자명",
+      "최종수정일"
+    ]);
+
+    const csvDownloadUrl = buildDataUrl(csv);
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-end justify-between gap-4">
+          <PageTitle description="교육 목록 조회" />
+
+          <div className="flex gap-2">
+            <a
+              href={csvDownloadUrl}
+              download="programs.csv"
+              className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              CSV 다운로드
+            </a>
+
+            <Link
+              href="/programs/new"
+              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              교육 등록
+            </Link>
+          </div>
+        </div>
+
+        {successMessage ? (
+          <MessageBox tone="success" message={successMessage} />
+        ) : null}
+
+        {programs.length === 0 ? (
+          <MessageBox
+            tone="info"
+            title="등록된 교육이 없습니다."
+            message="우측 상단의 교육 등록 버튼으로 첫 교육을 추가하세요."
+          />
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left">연도</th>
+                    <th className="px-4 py-3 text-left">사업명</th>
+                    <th className="px-4 py-3 text-left">교육명</th>
+                    <th className="px-4 py-3 text-left">기간</th>
+                    <th className="px-4 py-3 text-left">교육시수</th>
+                    <th className="px-4 py-3 text-left">수료자수</th>
+                    <th className="px-4 py-3 text-left">상태</th>
+                    <th className="px-4 py-3 text-left">담당자명</th>
+                    <th className="px-4 py-3 text-left">최종수정자명</th>
+                    <th className="px-4 py-3 text-left">최종수정일</th>
+                    <th className="px-4 py-3 text-left">수정</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {programs.map((program) => (
+                    <tr key={program.id} className="border-t border-slate-200">
+                      <td className="px-4 py-3">{program.project_year ?? "-"}</td>
+                      <td className="px-4 py-3">{program.project_name ?? "-"}</td>
+                      <td className="px-4 py-3 font-medium text-slate-900">
+                        {program.program_name}
+                      </td>
+                      <td className="px-4 py-3">
+                        {formatDate(program.start_date)} ~ {formatDate(program.end_date)}
+                      </td>
+                      <td className="px-4 py-3">{program.hours}</td>
+                      <td className="px-4 py-3">{program.completion_count ?? "-"}</td>
+                      <td className="px-4 py-3">
+                        {getProgramStatus(program.completion_count)}
+                      </td>
+                      <td className="px-4 py-3">{program.manager_name}</td>
+                      <td className="px-4 py-3">{program.updated_by_name ?? "-"}</td>
+                      <td className="px-4 py-3">{formatDateTime(program.updated_at)}</td>
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/programs/${program.id}`}
+                          className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          수정
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="space-y-6">
+        <PageTitle description="교육 목록 조회" />
+
+        <MessageBox
+          tone="error"
+          title="교육 목록을 불러오지 못했습니다."
+          message={error instanceof Error ? error.message : "잠시 후 다시 시도해주세요."}
+        />
+      </div>
+    );
+  }
+}
