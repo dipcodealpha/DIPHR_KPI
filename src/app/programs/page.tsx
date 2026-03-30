@@ -73,12 +73,13 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
               CSV 다운로드
             </a>
 
-            <Link
-              href="/programs/new"
-              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-            >
-              교육 등록
-            </Link>
+<Link
+  href="/programs/new"
+  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium !text-white transition hover:bg-slate-800"
+  style={{ color: "#ffffff" }}
+>
+  교육 등록
+</Link>
           </div>
         </div>
 
