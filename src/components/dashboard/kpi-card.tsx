@@ -6,14 +6,17 @@ interface KpiCardProps {
 
 export function KpiCard({ title, value, description }: KpiCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-      <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
+    <section className="rounded-xl border border-slate-300 bg-white px-5 py-4 shadow-sm">
+      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+        KPI
+      </div>
+      <p className="mt-2 text-sm font-medium text-slate-700">{title}</p>
+      <p className="mt-3 text-3xl font-semibold tracking-[-0.02em] text-slate-900">
         {value}
       </p>
       {description ? (
-        <p className="mt-2 text-xs text-slate-500">{description}</p>
+        <p className="mt-2 text-xs leading-5 text-slate-500">{description}</p>
       ) : null}
-    </div>
+    </section>
   );
 }

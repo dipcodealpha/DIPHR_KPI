@@ -23,11 +23,11 @@ export function AppShell({ children }: AppShellProps) {
       <div className="flex min-h-screen">
         <Sidebar />
 
-        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-slate-100">
           <Topbar />
 
           <main className="flex-1">
-            <div className="mx-auto w-full max-w-[1680px] px-6 py-6 lg:px-8">
+            <div className="mx-auto w-full max-w-[1600px] px-6 py-6 lg:px-8 lg:py-8">
               {children}
             </div>
           </main>

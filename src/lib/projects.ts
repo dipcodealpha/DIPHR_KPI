@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { recordAuditLog } from "@/lib/audit-log";
-import type { ProjectOption, ProjectRow } from "@/types";
+import type { AuditLogRow, ProjectListItem, ProjectOption, ProjectRow } from "@/types";
 
 interface ProjectMutationInput {
   project_year: number;
@@ -12,17 +12,60 @@ interface ProjectMutationInput {
 export async function listProjects() {
   const supabase = createSupabaseServerClient();
 
+  const [{ data: projectsData, error: projectsError }, { data: auditLogsData, error: auditLogsError }] =
+    await Promise.all([
+      supabase
+        .from("projects")
+        .select("*")
+        .order("project_year", { ascending: false })
+        .order("project_name", { ascending: true }),
+      supabase
+        .from("audit_logs")
+        .select("target_id, changed_by_name, changed_at")
+        .eq("target_type", "projects")
+        .order("changed_at", { ascending: false })
+    ]);
+
+  if (projectsError) {
+    throw new Error(`projects 조회 실패: ${projectsError.message}`);
+  }
+
+  if (auditLogsError) {
+    throw new Error(`project 감사로그 조회 실패: ${auditLogsError.message}`);
+  }
+
+  const latestChangedByMap = new Map<string, string>();
+
+  for (const log of (auditLogsData ?? []) as Array<
+    Pick<AuditLogRow, "target_id" | "changed_by_name" | "changed_at">
+  >) {
+    if (!latestChangedByMap.has(log.target_id)) {
+      latestChangedByMap.set(log.target_id, log.changed_by_name);
+    }
+  }
+
+  return ((projectsData ?? []) as ProjectRow[]).map(
+    (project): ProjectListItem => ({
+      ...project,
+      latest_changed_by_name: latestChangedByMap.get(project.id) ?? null
+    })
+  );
+}
+
+export async function getProjectById(id: string) {
+  const supabase = createSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("projects")
     .select("*")
-    .order("project_year", { ascending: false })
-    .order("project_name", { ascending: true });
+    .eq("id", id)
+    .single();
 
-  if (error) {
-    throw new Error(`projects 조회 실패: ${error.message}`);
+  if (error || !data) {
+    throw new Error(`project 조회 실패: ${error?.message ?? "not found"}`);
   }
 
-  return (data ?? []) as ProjectRow[];
+  return data as ProjectRow;
 }
 
 export async function getProjectOptions() {

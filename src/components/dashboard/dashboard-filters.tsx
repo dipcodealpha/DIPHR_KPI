@@ -15,14 +15,23 @@ export function DashboardFilters({
   selected
 }: DashboardFiltersProps) {
   return (
-    <form className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <form className="rounded-xl border border-slate-300 bg-white p-5 shadow-sm">
+      <div className="mb-4 border-b border-slate-200 pb-3">
+        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          Filter
+        </div>
+        <p className="mt-2 text-sm font-medium text-slate-800">
+          조회 조건을 선택한 뒤 결과를 확인합니다.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">연도</label>
           <select
             name="year"
             defaultValue={selected.year}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
           >
             <option value="">전체</option>
             {filters.years.map((year) => (
@@ -38,7 +47,7 @@ export function DashboardFilters({
           <select
             name="projectId"
             defaultValue={selected.projectId}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
           >
             <option value="">전체</option>
             {filters.projects.map((project) => (
@@ -54,7 +63,7 @@ export function DashboardFilters({
           <select
             name="manager"
             defaultValue={selected.manager}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
           >
             <option value="">전체</option>
             {filters.managers.map((manager) => (
@@ -68,14 +77,14 @@ export function DashboardFilters({
         <div className="flex items-end gap-2">
           <button
             type="submit"
-            className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white"
+            className="rounded-lg border border-slate-800 bg-slate-800 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-700"
           >
             필터 적용
           </button>
 
           <Link
             href="/dashboard"
-            className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium text-slate-700"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
             초기화
           </Link>

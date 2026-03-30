@@ -29,22 +29,22 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-slate-950 text-slate-100 lg:flex lg:flex-col">
-      <div className="border-b border-slate-800 px-6 py-6">
-        <div className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
-          Team Performance
+    <aside className="hidden w-64 shrink-0 border-r border-slate-300 bg-slate-900 text-slate-100 lg:flex lg:flex-col">
+      <div className="border-b border-slate-700 px-6 py-6">
+        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+          Integrated Admin
         </div>
-        <div className="mt-2 text-xl font-semibold tracking-tight text-white">
+        <div className="mt-2 text-xl font-semibold tracking-[-0.02em] text-white">
           내부 관리도구
         </div>
-        <div className="mt-1 text-sm text-slate-400">
+        <div className="mt-1 text-sm leading-6 text-slate-300">
           사업 · 교육 · 성과 통합 관리
         </div>
       </div>
 
       <nav className="flex-1 px-4 py-6">
-        <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-          Navigation
+        <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          메뉴
         </div>
 
         <ul className="space-y-2">
@@ -56,10 +56,10 @@ export function Sidebar() {
                 <Link
                   href={item.href}
                   className={[
-                    "flex items-center rounded-xl px-4 py-3 text-sm font-medium transition",
+                    "flex items-center rounded-lg border px-4 py-3 text-sm font-medium transition",
                     active
-                      ? "bg-slate-800 text-white shadow-sm"
-                      : "text-slate-300 hover:bg-slate-900 hover:text-white"
+                      ? "border-slate-600 bg-slate-800 text-white"
+                      : "border-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-800/80 hover:text-white"
                   ].join(" ")}
                 >
                   {item.label}
@@ -70,7 +70,7 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      <div className="border-t border-slate-800 px-6 py-4 text-xs text-slate-500">
+      <div className="border-t border-slate-700 px-6 py-4 text-xs leading-5 text-slate-400">
         운영 화면은 데스크톱 기준으로 최적화되어 있습니다.
       </div>
     </aside>

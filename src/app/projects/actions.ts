@@ -13,6 +13,16 @@ import {
   updateProject
 } from "@/lib/projects";
 
+function appendSuccessParam(path: string, success: string) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}success=${success}`;
+}
+
+function getRedirectTarget(formData: FormData, fallbackPath: string) {
+  const redirectTo = formData.get("redirect_to");
+  return typeof redirectTo === "string" && redirectTo.trim() ? redirectTo : fallbackPath;
+}
+
 export async function createProjectAction(formData: FormData) {
   const parsed = projectCreateSchema.parse({
     project_year: formData.get("project_year"),
@@ -35,7 +45,8 @@ export async function createProjectAction(formData: FormData) {
   revalidatePath("/projects");
   revalidatePath("/programs/new");
   revalidatePath("/dashboard");
-  redirect("/projects?success=created");
+
+  redirect(appendSuccessParam("/projects", "created"));
 }
 
 export async function updateProjectAction(formData: FormData) {
@@ -59,10 +70,17 @@ export async function updateProjectAction(formData: FormData) {
     parsed.changed_by_name
   );
 
+  const redirectPath = getRedirectTarget(formData, "/projects");
+
   revalidatePath("/projects");
   revalidatePath("/programs/new");
   revalidatePath("/dashboard");
-  redirect("/projects?success=updated");
+
+  if (redirectPath.startsWith("/projects/")) {
+    revalidatePath(redirectPath);
+  }
+
+  redirect(appendSuccessParam(redirectPath, "updated"));
 }
 
 export async function deactivateProjectAction(formData: FormData) {
@@ -73,8 +91,15 @@ export async function deactivateProjectAction(formData: FormData) {
 
   await deactivateProject(parsed.id, parsed.changed_by_name);
 
+  const redirectPath = getRedirectTarget(formData, "/projects");
+
   revalidatePath("/projects");
   revalidatePath("/programs/new");
   revalidatePath("/dashboard");
-  redirect("/projects?success=deactivated");
+
+  if (redirectPath.startsWith("/projects/")) {
+    revalidatePath(redirectPath);
+  }
+
+  redirect(appendSuccessParam(redirectPath, "deactivated"));
 }

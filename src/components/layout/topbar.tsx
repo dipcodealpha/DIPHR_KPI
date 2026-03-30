@@ -31,23 +31,25 @@ export function Topbar() {
   );
 
   return (
-    <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[1680px] items-center justify-between px-6 py-4 lg:px-8">
+    <header className="border-b border-slate-300 bg-white">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-4 lg:px-8">
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Internal Workspace
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Administration
           </div>
-          <h1 className="mt-1 truncate text-lg font-semibold tracking-tight text-slate-900">
+          <h1 className="mt-1 truncate text-xl font-semibold tracking-[-0.02em] text-slate-900">
             {title}
           </h1>
-          <p className="mt-1 truncate text-sm text-slate-500">{description}</p>
+          <p className="mt-1 truncate text-sm leading-6 text-slate-600">
+            {description}
+          </p>
         </div>
 
-        <div className="hidden rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-right lg:block">
-          <div className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
-            Status
+        <div className="hidden rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-right lg:block">
+          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            운영 상태
           </div>
-          <div className="mt-1 text-sm font-medium text-slate-700">운영 모드</div>
+          <div className="mt-1 text-sm font-medium text-slate-700">정상 운영</div>
         </div>
       </div>
     </header>

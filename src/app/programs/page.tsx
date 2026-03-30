@@ -39,6 +39,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
       수료자수: program.completion_count ?? "",
       상태: getProgramStatus(program.completion_count),
       담당자명: program.manager_name,
+      비고: program.note ?? "",
       최종수정자명: program.updated_by_name ?? "",
       최종수정일: formatDateTime(program.updated_at)
     }));
@@ -53,6 +54,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
       "수료자수",
       "상태",
       "담당자명",
+      "비고",
       "최종수정자명",
       "최종수정일"
     ]);
@@ -73,13 +75,13 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
               CSV 다운로드
             </a>
 
-<Link
-  href="/programs/new"
-  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium !text-white transition hover:bg-slate-800"
-  style={{ color: "#ffffff" }}
->
-  교육 등록
-</Link>
+            <Link
+              href="/programs/new"
+              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium !text-white transition hover:bg-slate-800"
+              style={{ color: "#ffffff" }}
+            >
+              교육 등록
+            </Link>
           </div>
         </div>
 
@@ -107,6 +109,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
                     <th className="px-4 py-3 text-left">수료자수</th>
                     <th className="px-4 py-3 text-left">상태</th>
                     <th className="px-4 py-3 text-left">담당자명</th>
+                    <th className="px-4 py-3 text-left">비고</th>
                     <th className="px-4 py-3 text-left">최종수정자명</th>
                     <th className="px-4 py-3 text-left">최종수정일</th>
                     <th className="px-4 py-3 text-left">수정</th>
@@ -114,13 +117,22 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
                 </thead>
                 <tbody>
                   {programs.map((program) => (
-                    <tr key={program.id} className="border-t border-slate-200">
+                    <tr
+                      key={program.id}
+                      className="border-t border-slate-200 transition hover:bg-slate-50"
+                    >
                       <td className="px-4 py-3">{program.project_year ?? "-"}</td>
                       <td className="px-4 py-3">{program.project_name ?? "-"}</td>
                       <td className="px-4 py-3 font-medium text-slate-900">
-                        {program.program_name}
+                        <Link
+                          href={`/programs/${program.id}`}
+                          className="inline-flex max-w-[240px] truncate underline-offset-4 hover:underline"
+                          title={program.program_name}
+                        >
+                          {program.program_name}
+                        </Link>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         {formatDate(program.start_date)} ~ {formatDate(program.end_date)}
                       </td>
                       <td className="px-4 py-3">{program.hours}</td>
@@ -129,8 +141,19 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
                         {getProgramStatus(program.completion_count)}
                       </td>
                       <td className="px-4 py-3">{program.manager_name}</td>
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/programs/${program.id}`}
+                          className="block max-w-[280px] truncate text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline"
+                          title={program.note ?? ""}
+                        >
+                          {program.note?.trim() ? program.note : "-"}
+                        </Link>
+                      </td>
                       <td className="px-4 py-3">{program.updated_by_name ?? "-"}</td>
-                      <td className="px-4 py-3">{formatDateTime(program.updated_at)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {formatDateTime(program.updated_at)}
+                      </td>
                       <td className="px-4 py-3">
                         <Link
                           href={`/programs/${program.id}`}

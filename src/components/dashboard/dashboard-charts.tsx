@@ -18,7 +18,7 @@ interface DashboardChartsProps {
 
 function EmptyChart() {
   return (
-    <div className="flex h-[320px] w-full min-w-0 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500">
+    <div className="flex h-[320px] w-full min-w-0 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
       표시할 데이터가 없습니다.
     </div>
   );
@@ -26,7 +26,7 @@ function EmptyChart() {
 
 function ChartSkeleton() {
   return (
-    <div className="h-[320px] w-full rounded-xl border border-dashed border-slate-200 bg-slate-50" />
+    <div className="h-[320px] w-full rounded-lg border border-dashed border-slate-300 bg-slate-50" />
   );
 }
 
@@ -74,11 +74,11 @@ function ChartContainer({
           data={data}
           margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" className="text-xs" />
-          <YAxis allowDecimals={false} className="text-xs" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+          <XAxis dataKey="name" className="text-xs" tickLine={false} axisLine={{ stroke: "#cbd5e1" }} />
+          <YAxis allowDecimals={false} className="text-xs" tickLine={false} axisLine={{ stroke: "#cbd5e1" }} />
           <Tooltip />
-          <Bar dataKey="value" />
+          <Bar dataKey="value" fill="#475569" radius={[2, 2, 0, 0]} />
         </BarChart>
       ) : (
         <ChartSkeleton />

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageTitle } from "@/components/ui/page-title";
 import { MessageBox } from "@/components/ui/message-box";
 import { buildCsv, buildDataUrl } from "@/lib/csv";
@@ -5,8 +6,7 @@ import { formatDateTime } from "@/lib/format";
 import { listProjects } from "@/lib/projects";
 import {
   createProjectAction,
-  deactivateProjectAction,
-  updateProjectAction
+  deactivateProjectAction
 } from "@/app/projects/actions";
 
 interface ProjectsPageProps {
@@ -32,17 +32,18 @@ function getSuccessMessage(success?: string) {
 }
 
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const successMessage = getSuccessMessage(resolvedSearchParams.success);
+
   try {
-    const resolvedSearchParams = searchParams ? await searchParams : {};
-    const successMessage = getSuccessMessage(resolvedSearchParams.success);
     const projects = await listProjects();
 
     const csvRows = projects.map((project) => ({
       연도: project.project_year,
       사업명: project.project_name,
       부서: project.department ?? "",
-      비고: project.note ?? "",
-      활성여부: project.is_active ? "활성" : "비활성",
+      처리자명: project.latest_changed_by_name ?? "",
+      상태: project.is_active ? "활성" : "비활성",
       최종수정일: formatDateTime(project.updated_at)
     }));
 
@@ -50,8 +51,8 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       "연도",
       "사업명",
       "부서",
-      "비고",
-      "활성여부",
+      "처리자명",
+      "상태",
       "최종수정일"
     ]);
 
@@ -144,104 +145,85 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
               message="등록된 사업이 없습니다. 먼저 사업을 등록해 주세요."
             />
           ) : (
-            projects.map((project) => (
-              <div
-                key={project.id}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
-                <div className="mb-4 flex items-start justify-between gap-4">
-                  <div>
-                    <h4 className="text-lg font-semibold text-slate-900">
-                      {project.project_year} / {project.project_name}
-                    </h4>
-                    <p className="mt-1 text-sm text-slate-500">
-                      상태: {project.is_active ? "활성" : "비활성"} · 최종수정일:{" "}
-                      {formatDateTime(project.updated_at)}
-                    </p>
-                  </div>
-                </div>
-
-                <form action={updateProjectAction} className="grid gap-4 md:grid-cols-2">
-                  <input type="hidden" name="id" value={project.id} />
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">사업연도</label>
-                    <input
-                      name="project_year"
-                      type="number"
-                      defaultValue={project.project_year}
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">사업명</label>
-                    <input
-                      name="project_name"
-                      defaultValue={project.project_name}
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">부서</label>
-                    <input
-                      name="department"
-                      defaultValue={project.department ?? ""}
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">처리자명</label>
-                    <input
-                      name="changed_by_name"
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">비고</label>
-                    <textarea
-                      name="note"
-                      rows={4}
-                      defaultValue={project.note ?? ""}
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 flex gap-2">
-                    <button
-                      type="submit"
-                      className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                    >
-                      수정 저장
-                    </button>
-                  </div>
-                </form>
-
-                {project.is_active ? (
-                  <form action={deactivateProjectAction} className="mt-3 flex gap-2">
-                    <input type="hidden" name="id" value={project.id} />
-                    <input
-                      name="changed_by_name"
-                      placeholder="비활성화 처리자명"
-                      className="w-full max-w-xs rounded-xl border border-slate-300 px-4 py-3 text-sm"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-100"
-                    >
-                      비활성화
-                    </button>
-                  </form>
-                ) : null}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="px-4 py-3 text-left">연도</th>
+                      <th className="px-4 py-3 text-left">사업명</th>
+                      <th className="px-4 py-3 text-left">부서</th>
+                      <th className="px-4 py-3 text-left">처리자명</th>
+                      <th className="px-4 py-3 text-left">상태</th>
+                      <th className="px-4 py-3 text-left">최종수정일</th>
+                      <th className="px-4 py-3 text-left">수정</th>
+                      <th className="px-4 py-3 text-left">비활성화</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {projects.map((project) => (
+                      <tr
+                        key={project.id}
+                        className="border-t border-slate-200 transition hover:bg-slate-50"
+                      >
+                        <td className="px-4 py-3">{project.project_year}</td>
+                        <td className="px-4 py-3 font-medium text-slate-900">
+                          <Link
+                            href={`/projects/${project.id}`}
+                            className="inline-flex max-w-[280px] truncate underline-offset-4 hover:underline"
+                            title={project.project_name}
+                          >
+                            {project.project_name}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">{project.department ?? "-"}</td>
+                        <td className="px-4 py-3">
+                          {project.latest_changed_by_name ?? "-"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {project.is_active ? "활성" : "비활성"}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {formatDateTime(project.updated_at)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Link
+                            href={`/projects/${project.id}`}
+                            className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            수정
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3">
+                          {project.is_active ? (
+                            <form action={deactivateProjectAction}>
+                              <input type="hidden" name="id" value={project.id} />
+                              <input type="hidden" name="redirect_to" value="/projects" />
+                              <div className="flex min-w-[220px] gap-2">
+                                <input
+                                  name="changed_by_name"
+                                  placeholder="처리자명"
+                                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs"
+                                  required
+                                />
+                                <button
+                                  type="submit"
+                                  className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-100"
+                                >
+                                  비활성화
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <span className="text-xs text-slate-400">완료</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))
+            </div>
           )}
         </section>
       </div>

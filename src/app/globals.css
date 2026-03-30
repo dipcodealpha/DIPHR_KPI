@@ -9,10 +9,15 @@ body {
   min-height: 100%;
 }
 
+html {
+  background-color: rgb(244 247 250);
+}
+
 body {
   margin: 0;
-  background-color: rgb(241 245 249);
-  color: rgb(15 23 42);
+  background-color: rgb(244 247 250);
+  color: rgb(17 24 39);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -46,7 +51,7 @@ h4,
 h5,
 h6 {
   margin: 0;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   color: rgb(15 23 42);
 }
 
@@ -61,7 +66,36 @@ button {
   outline: none;
 }
 
+input,
+select,
+textarea {
+  background-color: rgb(255 255 255);
+  border-color: rgb(203 213 225);
+  color: rgb(15 23 42);
+}
+
 input::placeholder,
 textarea::placeholder {
   color: rgb(148 163 184);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgb(71 85 105);
+  box-shadow: 0 0 0 1px rgb(71 85 105 / 0.18);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgb(51 65 85 / 0.28);
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: rgb(203 213 225);
+  color: rgb(15 23 42);
 }

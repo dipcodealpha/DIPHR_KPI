@@ -11,6 +11,10 @@ export interface ProjectRow {
   updated_at: string;
 }
 
+export interface ProjectListItem extends ProjectRow {
+  latest_changed_by_name: string | null;
+}
+
 export interface ProgramRow {
   id: string;
   project_id: string;
