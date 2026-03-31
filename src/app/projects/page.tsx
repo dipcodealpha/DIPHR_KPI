@@ -199,7 +199,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                             <form action={deactivateProjectAction}>
                               <input type="hidden" name="id" value={project.id} />
                               <input type="hidden" name="redirect_to" value="/projects" />
-                              <div className="flex min-w-[220px] gap-2">
+                              <div className="flex min-w-[240px] items-center gap-2">
                                 <input
                                   name="changed_by_name"
                                   placeholder="처리자명"
@@ -208,7 +208,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                                 />
                                 <button
                                   type="submit"
-                                  className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-100"
+                                  className="shrink-0 min-w-[88px] whitespace-nowrap rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition hover:bg-red-100"
                                 >
                                   비활성화
                                 </button>
