@@ -48,6 +48,7 @@ export interface DashboardAuditItem {
   changed_by_name: string;
   changed_at: string;
   target_id: string;
+  target_name: string | null;
   after_value: Record<string, unknown> | null;
 }
 
@@ -94,11 +95,11 @@ function sortChartDesc(items: DashboardChartItem[]) {
   return items.sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "ko"));
 }
 
-function sortChartAscByName(items: DashboardChartItem[]) {
+function sortMonthChartAsc(items: DashboardChartItem[]) {
   return items.sort((a, b) => a.name.localeCompare(b.name, "ko"));
 }
 
-function getMonthKey(dateString: string) {
+function formatMonthLabel(dateString: string) {
   if (!dateString || typeof dateString !== "string") return "날짜 미상";
 
   const parsed = new Date(dateString);
@@ -107,7 +108,7 @@ function getMonthKey(dateString: string) {
   const year = parsed.getFullYear();
   const month = String(parsed.getMonth() + 1).padStart(2, "0");
 
-  return `${year}-${month}`;
+  return `${year}.${month}`;
 }
 
 function getYearKey(dateString: string, fallbackYear: number) {
@@ -117,6 +118,32 @@ function getYearKey(dateString: string, fallbackYear: number) {
   if (Number.isNaN(parsed.getTime())) return String(fallbackYear);
 
   return String(parsed.getFullYear());
+}
+
+function getAuditTargetName(
+  log: {
+    target_type: string;
+    target_id: string;
+    after_value: Record<string, unknown> | null;
+  },
+  projectNameMap: Map<string, string>,
+  programNameMap: Map<string, string>
+) {
+  if (log.target_type === "projects") {
+    const mappedName = projectNameMap.get(log.target_id);
+    const fallbackName = String(log.after_value?.project_name ?? "").trim();
+
+    return mappedName ?? (fallbackName || null);
+  }
+
+  if (log.target_type === "programs") {
+    const mappedName = programNameMap.get(log.target_id);
+    const fallbackName = String(log.after_value?.program_name ?? "").trim();
+
+    return mappedName ?? (fallbackName || null);
+  }
+
+  return null;
 }
 
 export async function getDashboardData(
@@ -238,6 +265,11 @@ export async function getDashboardData(
   const filteredProjects = projects.filter((project) => relatedProjectIds.has(project.id));
   const filteredProgramIds = new Set(filteredPrograms.map((program) => program.id));
 
+  const projectNameMap = new Map(
+    projects.map((project) => [project.id, `${project.project_year} / ${project.project_name}`])
+  );
+  const programNameMap = new Map(allPrograms.map((program) => [program.id, program.program_name]));
+
   const totalPrograms = filteredPrograms.length;
   const totalHours = filteredPrograms.reduce((sum, program) => sum + toNumber(program.hours), 0);
   const totalCompletionCount = filteredPrograms.reduce(
@@ -264,7 +296,7 @@ export async function getDashboardData(
 
   for (const program of filteredPrograms) {
     const actualYearKey = getYearKey(program.start_date, program.project_year);
-    const monthKey = getMonthKey(program.start_date);
+    const monthKey = formatMonthLabel(program.start_date);
     const projectKey = program.project_name;
     const completionCount = toNumber(program.completion_count);
 
@@ -304,10 +336,10 @@ export async function getDashboardData(
     ),
     byProject: sortChartDesc(Array.from(byProjectMap.values())),
     byProjectParticipants: sortChartDesc(Array.from(byProjectParticipantsMap.values())),
-    byMonthPrograms: sortChartAscByName(
+    byMonthPrograms: sortMonthChartAsc(
       Array.from(byMonthProgramsMap.entries()).map(([name, value]) => ({ name, value }))
     ),
-    byMonthCompletions: sortChartAscByName(
+    byMonthCompletions: sortMonthChartAsc(
       Array.from(byMonthCompletionsMap.entries()).map(([name, value]) => ({ name, value }))
     )
   };
@@ -320,7 +352,15 @@ export async function getDashboardData(
     .filter((program) => program.status === "완료")
     .slice(0, 20);
 
-  const recentAuditLogs = ((auditLogsResult.data ?? []) as DashboardAuditItem[])
+  const recentAuditLogs = ((auditLogsResult.data ?? []) as Array<{
+    id: string;
+    target_type: string;
+    action_type: string;
+    changed_by_name: string;
+    changed_at: string;
+    target_id: string;
+    after_value: Record<string, unknown> | null;
+  }>)
     .filter((log) => {
       if (log.target_type === "programs") {
         return filteredProgramIds.has(log.target_id);
@@ -332,6 +372,10 @@ export async function getDashboardData(
 
       return false;
     })
+    .map((log) => ({
+      ...log,
+      target_name: getAuditTargetName(log, projectNameMap, programNameMap)
+    }))
     .slice(0, 10);
 
   return {

@@ -131,6 +131,7 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
               <thead className="bg-slate-100 text-slate-700">
                 <tr>
                   <th className="px-3 py-3 text-left font-semibold">대상</th>
+                  <th className="px-3 py-3 text-left font-semibold">대상명</th>
                   <th className="px-3 py-3 text-left font-semibold">작업유형</th>
                   <th className="px-3 py-3 text-left font-semibold">수정자</th>
                   <th className="px-3 py-3 text-left font-semibold">수정일</th>
@@ -143,6 +144,7 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
                     className="border-t border-slate-200 transition hover:bg-slate-50"
                   >
                     <td className="px-3 py-3">{getTargetLabel(log.target_type)}</td>
+                    <td className="px-3 py-3">{log.target_name ?? "-"}</td>
                     <td className="px-3 py-3">{getActionLabel(log.action_type)}</td>
                     <td className="px-3 py-3">{log.changed_by_name}</td>
                     <td className="px-3 py-3 whitespace-nowrap">
