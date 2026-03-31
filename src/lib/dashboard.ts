@@ -8,6 +8,7 @@ export interface DashboardFilterOptions {
     label: string;
   }>;
   managers: string[];
+  statuses: Array<"예정" | "완료">;
 }
 
 export interface DashboardKpi {
@@ -15,9 +16,12 @@ export interface DashboardKpi {
   totalPrograms: number;
   totalHours: number;
   totalCompletionCount: number;
+  averageCompletionPerProgram: number;
+  averageHoursPerProgram: number;
 }
 
 export interface DashboardChartItem {
+  id?: string;
   name: string;
   value: number;
 }
@@ -53,6 +57,7 @@ export interface DashboardData {
     year: string;
     projectId: string;
     manager: string;
+    status: string;
   };
   kpi: DashboardKpi;
   charts: {
@@ -60,6 +65,8 @@ export interface DashboardData {
     byYearParticipants: DashboardChartItem[];
     byProject: DashboardChartItem[];
     byProjectParticipants: DashboardChartItem[];
+    byMonthPrograms: DashboardChartItem[];
+    byMonthCompletions: DashboardChartItem[];
   };
   lists: {
     scheduled: DashboardProgramListItem[];
@@ -72,6 +79,7 @@ interface GetDashboardDataParams {
   year?: string;
   projectId?: string;
   manager?: string;
+  status?: string;
 }
 
 function getProgramStatus(completionCount: number | null): "예정" | "완료" {
@@ -84,6 +92,31 @@ function toNumber(value: unknown) {
 
 function sortChartDesc(items: DashboardChartItem[]) {
   return items.sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "ko"));
+}
+
+function sortChartAscByName(items: DashboardChartItem[]) {
+  return items.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+}
+
+function getMonthKey(dateString: string) {
+  if (!dateString || typeof dateString !== "string") return "날짜 미상";
+
+  const parsed = new Date(dateString);
+  if (Number.isNaN(parsed.getTime())) return "날짜 미상";
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+
+  return `${year}-${month}`;
+}
+
+function getYearKey(dateString: string, fallbackYear: number) {
+  if (!dateString || typeof dateString !== "string") return String(fallbackYear);
+
+  const parsed = new Date(dateString);
+  if (Number.isNaN(parsed.getTime())) return String(fallbackYear);
+
+  return String(parsed.getFullYear());
 }
 
 export async function getDashboardData(
@@ -179,6 +212,7 @@ export async function getDashboardData(
   const selectedYear = params.year?.trim() ?? "";
   const selectedProjectId = params.projectId?.trim() ?? "";
   const selectedManager = params.manager?.trim() ?? "";
+  const selectedStatus = params.status?.trim() ?? "";
 
   const filteredPrograms = allPrograms.filter((program) => {
     if (selectedYear && String(program.project_year) !== selectedYear) {
@@ -193,43 +227,72 @@ export async function getDashboardData(
       return false;
     }
 
+    if (selectedStatus && program.status !== selectedStatus) {
+      return false;
+    }
+
     return true;
   });
 
   const relatedProjectIds = new Set(filteredPrograms.map((program) => program.project_id));
   const filteredProjects = projects.filter((project) => relatedProjectIds.has(project.id));
+  const filteredProgramIds = new Set(filteredPrograms.map((program) => program.id));
+
+  const totalPrograms = filteredPrograms.length;
+  const totalHours = filteredPrograms.reduce((sum, program) => sum + toNumber(program.hours), 0);
+  const totalCompletionCount = filteredPrograms.reduce(
+    (sum, program) => sum + toNumber(program.completion_count),
+    0
+  );
 
   const kpi: DashboardKpi = {
     totalProjects: filteredProjects.length,
-    totalPrograms: filteredPrograms.length,
-    totalHours: filteredPrograms.reduce((sum, program) => sum + toNumber(program.hours), 0),
-    totalCompletionCount: filteredPrograms.reduce(
-      (sum, program) => sum + toNumber(program.completion_count),
-      0
-    )
+    totalPrograms,
+    totalHours,
+    totalCompletionCount,
+    averageCompletionPerProgram:
+      totalPrograms > 0 ? Number((totalCompletionCount / totalPrograms).toFixed(1)) : 0,
+    averageHoursPerProgram: totalPrograms > 0 ? Number((totalHours / totalPrograms).toFixed(1)) : 0
   };
 
   const byYearMap = new Map<string, number>();
   const byYearParticipantsMap = new Map<string, number>();
-  const byProjectMap = new Map<string, number>();
-  const byProjectParticipantsMap = new Map<string, number>();
+  const byProjectMap = new Map<string, DashboardChartItem>();
+  const byProjectParticipantsMap = new Map<string, DashboardChartItem>();
+  const byMonthProgramsMap = new Map<string, number>();
+  const byMonthCompletionsMap = new Map<string, number>();
 
   for (const program of filteredPrograms) {
-    const yearKey = String(program.project_year);
+    const actualYearKey = getYearKey(program.start_date, program.project_year);
+    const monthKey = getMonthKey(program.start_date);
     const projectKey = program.project_name;
     const completionCount = toNumber(program.completion_count);
 
-    byYearMap.set(yearKey, (byYearMap.get(yearKey) ?? 0) + 1);
+    byYearMap.set(actualYearKey, (byYearMap.get(actualYearKey) ?? 0) + 1);
     byYearParticipantsMap.set(
-      yearKey,
-      (byYearParticipantsMap.get(yearKey) ?? 0) + completionCount
+      actualYearKey,
+      (byYearParticipantsMap.get(actualYearKey) ?? 0) + completionCount
     );
 
-    byProjectMap.set(projectKey, (byProjectMap.get(projectKey) ?? 0) + 1);
-    byProjectParticipantsMap.set(
-      projectKey,
-      (byProjectParticipantsMap.get(projectKey) ?? 0) + completionCount
+    byMonthProgramsMap.set(monthKey, (byMonthProgramsMap.get(monthKey) ?? 0) + 1);
+    byMonthCompletionsMap.set(
+      monthKey,
+      (byMonthCompletionsMap.get(monthKey) ?? 0) + completionCount
     );
+
+    const existingProjectCount = byProjectMap.get(projectKey);
+    byProjectMap.set(projectKey, {
+      id: program.project_id,
+      name: projectKey,
+      value: (existingProjectCount?.value ?? 0) + 1
+    });
+
+    const existingProjectCompletion = byProjectParticipantsMap.get(projectKey);
+    byProjectParticipantsMap.set(projectKey, {
+      id: program.project_id,
+      name: projectKey,
+      value: (existingProjectCompletion?.value ?? 0) + completionCount
+    });
   }
 
   const charts = {
@@ -239,14 +302,13 @@ export async function getDashboardData(
     byYearParticipants: sortChartDesc(
       Array.from(byYearParticipantsMap.entries()).map(([name, value]) => ({ name, value }))
     ),
-    byProject: sortChartDesc(
-      Array.from(byProjectMap.entries()).map(([name, value]) => ({ name, value }))
+    byProject: sortChartDesc(Array.from(byProjectMap.values())),
+    byProjectParticipants: sortChartDesc(Array.from(byProjectParticipantsMap.values())),
+    byMonthPrograms: sortChartAscByName(
+      Array.from(byMonthProgramsMap.entries()).map(([name, value]) => ({ name, value }))
     ),
-    byProjectParticipants: sortChartDesc(
-      Array.from(byProjectParticipantsMap.entries()).map(([name, value]) => ({
-        name,
-        value
-      }))
+    byMonthCompletions: sortChartAscByName(
+      Array.from(byMonthCompletionsMap.entries()).map(([name, value]) => ({ name, value }))
     )
   };
 
@@ -260,22 +322,15 @@ export async function getDashboardData(
 
   const recentAuditLogs = ((auditLogsResult.data ?? []) as DashboardAuditItem[])
     .filter((log) => {
-      if (selectedProjectId && log.target_type === "programs") {
-        const afterValue = log.after_value ?? {};
-        return String(afterValue.project_id ?? "") === selectedProjectId;
+      if (log.target_type === "programs") {
+        return filteredProgramIds.has(log.target_id);
       }
 
-      if (selectedManager && log.target_type === "programs") {
-        const afterValue = log.after_value ?? {};
-        return String(afterValue.manager_name ?? "") === selectedManager;
+      if (log.target_type === "projects") {
+        return relatedProjectIds.has(log.target_id);
       }
 
-      if (selectedYear && log.target_type === "programs") {
-        const afterValue = log.after_value ?? {};
-        return String(afterValue.start_date ?? "").startsWith(selectedYear);
-      }
-
-      return true;
+      return false;
     })
     .slice(0, 10);
 
@@ -283,12 +338,14 @@ export async function getDashboardData(
     filters: {
       years: filterYears,
       projects: filterProjects,
-      managers: filterManagers
+      managers: filterManagers,
+      statuses: ["예정", "완료"]
     },
     selected: {
       year: selectedYear,
       projectId: selectedProjectId,
-      manager: selectedManager
+      manager: selectedManager,
+      status: selectedStatus
     },
     kpi,
     charts,

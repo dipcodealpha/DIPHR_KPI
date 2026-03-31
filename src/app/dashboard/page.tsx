@@ -11,6 +11,7 @@ interface DashboardPageProps {
     year?: string;
     projectId?: string;
     manager?: string;
+    status?: string;
   }>;
 }
 
@@ -20,7 +21,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     const data = await getDashboardData({
       year: resolvedSearchParams.year,
       projectId: resolvedSearchParams.projectId,
-      manager: resolvedSearchParams.manager
+      manager: resolvedSearchParams.manager,
+      status: resolvedSearchParams.status
     });
 
     return (
@@ -29,28 +31,55 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            title="총 사업 수"
-            value={formatNumber(data.kpi.totalProjects)}
-            description="선택된 조건 기준 활성 사업 수"
-          />
-          <KpiCard
+            eyebrow="운영 현황"
             title="총 교육 수"
-            value={formatNumber(data.kpi.totalPrograms)}
-            description="선택된 조건 기준 교육 건수"
+            value={`${formatNumber(data.kpi.totalPrograms)}건`}
+            subValue={
+              data.kpi.totalProjects > 0
+                ? `${formatNumber(data.kpi.totalProjects)}개 사업 기준`
+                : "집계된 사업이 없습니다."
+            }
+            description="선택된 조건 기준 전체 교육 운영 건수"
           />
+
           <KpiCard
-            title="총 교육시수"
-            value={formatNumber(data.kpi.totalHours)}
-            description="선택된 조건 기준 누적 교육시수"
-          />
-          <KpiCard
+            eyebrow="성과 지표"
             title="총 수료자 수"
-            value={formatNumber(data.kpi.totalCompletionCount)}
+            value={`${formatNumber(data.kpi.totalCompletionCount)}명`}
+            subValue={
+              data.kpi.totalPrograms > 0
+                ? `${formatNumber(data.kpi.totalPrograms)}개 교육 기준`
+                : "집계된 교육이 없습니다."
+            }
             description="선택된 조건 기준 누적 수료자 수"
+          />
+
+          <KpiCard
+            eyebrow="평균 지표"
+            title="회당 평균 수료자 수"
+            value={`${formatNumber(data.kpi.averageCompletionPerProgram)}명`}
+            subValue={
+              data.kpi.totalPrograms > 0
+                ? `교육 1건당 평균 수료자`
+                : "계산 가능한 교육 데이터가 없습니다."
+            }
+            description="총 수료자 수를 총 교육 수로 나눈 평균값"
+          />
+
+          <KpiCard
+            eyebrow="운영 규모"
+            title="총 교육시수"
+            value={`${formatNumber(data.kpi.totalHours)}시간`}
+            subValue={
+              data.kpi.totalPrograms > 0
+                ? `회당 평균 ${formatNumber(data.kpi.averageHoursPerProgram)}시간`
+                : "계산 가능한 교육 데이터가 없습니다."
+            }
+            description="선택된 조건 기준 누적 교육 시수"
           />
         </section>
 
-        <DashboardCharts charts={data.charts} />
+        <DashboardCharts charts={data.charts} selected={data.selected} />
         <DashboardTables lists={data.lists} />
       </div>
     );

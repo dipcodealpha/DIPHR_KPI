@@ -7,6 +7,7 @@ interface DashboardFiltersProps {
     year: string;
     projectId: string;
     manager: string;
+    status: string;
   };
 }
 
@@ -18,16 +19,16 @@ export function DashboardFilters({
     <form className="rounded-xl border border-slate-300 bg-white p-5 shadow-sm">
       <div className="mb-4 border-b border-slate-200 pb-3">
         <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-          Filter
+          FILTER
         </div>
         <p className="mt-2 text-sm font-medium text-slate-800">
-          조회 조건을 선택한 뒤 결과를 확인합니다.
+          사업연도와 조건을 선택한 뒤 대시보드 결과를 확인합니다.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">연도</label>
+          <label className="text-sm font-medium text-slate-700">사업연도</label>
           <select
             name="year"
             defaultValue={selected.year}
@@ -69,6 +70,22 @@ export function DashboardFilters({
             {filters.managers.map((manager) => (
               <option key={manager} value={manager}>
                 {manager}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-slate-700">상태</label>
+          <select
+            name="status"
+            defaultValue={selected.status}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
+          >
+            <option value="">전체</option>
+            {filters.statuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
               </option>
             ))}
           </select>

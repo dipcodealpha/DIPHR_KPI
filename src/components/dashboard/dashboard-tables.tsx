@@ -1,4 +1,4 @@
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, formatNumber } from "@/lib/format";
 import type { DashboardData } from "@/lib/dashboard";
 
 interface DashboardTablesProps {
@@ -28,18 +28,23 @@ function EmptyState({ message }: { message: string }) {
 
 function TableSection({
   title,
+  description,
   rows
 }: {
   title: string;
+  description?: string;
   rows: DashboardData["lists"]["scheduled"] | DashboardData["lists"]["completed"];
 }) {
   return (
     <section className="rounded-xl border border-slate-300 bg-white p-5 shadow-sm">
       <div className="mb-4 border-b border-slate-200 pb-3">
         <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-          Table
+          PROGRAM LIST
         </div>
         <h3 className="mt-2 text-base font-semibold text-slate-900">{title}</h3>
+        {description ? (
+          <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
+        ) : null}
       </div>
 
       {rows.length === 0 ? (
@@ -53,7 +58,7 @@ function TableSection({
                 <th className="px-3 py-3 text-left font-semibold">교육명</th>
                 <th className="px-3 py-3 text-left font-semibold">기간</th>
                 <th className="px-3 py-3 text-left font-semibold">시수</th>
-                <th className="px-3 py-3 text-left font-semibold">수료자수</th>
+                <th className="px-3 py-3 text-left font-semibold">수료자 수</th>
                 <th className="px-3 py-3 text-left font-semibold">담당자</th>
               </tr>
             </thead>
@@ -70,8 +75,14 @@ function TableSection({
                   <td className="px-3 py-3 whitespace-nowrap">
                     {formatDate(program.start_date)} ~ {formatDate(program.end_date)}
                   </td>
-                  <td className="px-3 py-3">{program.hours}</td>
-                  <td className="px-3 py-3">{program.completion_count ?? "-"}</td>
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    {formatNumber(program.hours)}시간
+                  </td>
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    {program.completion_count === null
+                      ? "-"
+                      : `${formatNumber(program.completion_count)}명`}
+                  </td>
                   <td className="px-3 py-3">{program.manager_name}</td>
                 </tr>
               ))}
@@ -87,18 +98,29 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
   return (
     <div className="grid grid-cols-1 gap-6">
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <TableSection title="예정 교육 목록" rows={lists.scheduled} />
-        <TableSection title="완료 교육 목록" rows={lists.completed} />
+        <TableSection
+          title="예정 교육 목록"
+          description="아직 수료 처리되지 않은 교육 목록입니다."
+          rows={lists.scheduled}
+        />
+        <TableSection
+          title="완료 교육 목록"
+          description="수료 처리된 교육 목록입니다."
+          rows={lists.completed}
+        />
       </div>
 
       <section className="rounded-xl border border-slate-300 bg-white p-5 shadow-sm">
         <div className="mb-4 border-b border-slate-200 pb-3">
           <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-            Audit Log
+            AUDIT LOG
           </div>
           <h3 className="mt-2 text-base font-semibold text-slate-900">
             최근 수정 목록 10건
           </h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            현재 조건과 연관된 사업 및 교육의 최근 변경 이력입니다.
+          </p>
         </div>
 
         {lists.recentAuditLogs.length === 0 ? (
