@@ -16,9 +16,12 @@ import { ChartTooltip } from "@/components/dashboard/chart-tooltip";
 interface ProjectBarChartProps {
   data: DashboardChartItem[];
   valueLabel: string;
+  selectedProjectId?: string;
   onSelectProject?: (projectId: string) => void;
 }
 
+const DEFAULT_BAR_COLOR = "#94a3b8";
+const ACTIVE_BAR_COLOR = "#0f172a";
 const BAR_COLORS = [
   "#334155",
   "#475569",
@@ -33,8 +36,11 @@ const BAR_COLORS = [
 export function ProjectBarChart({
   data,
   valueLabel,
+  selectedProjectId,
   onSelectProject
 }: ProjectBarChartProps) {
+  const hasSelectedProject = Boolean(selectedProjectId);
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
@@ -63,18 +69,28 @@ export function ProjectBarChart({
           dataKey="value"
           radius={[0, 6, 6, 0]}
           onClick={(entry) => {
-            if (entry?.id && onSelectProject) {
-              onSelectProject(entry.id);
-            }
+            if (!entry?.id || !onSelectProject) return;
+            onSelectProject(entry.id);
           }}
           className={onSelectProject ? "cursor-pointer" : ""}
         >
-          {data.map((item, index) => (
-            <Cell
-              key={`${item.name}-${index}`}
-              fill={BAR_COLORS[index % BAR_COLORS.length]}
-            />
-          ))}
+          {data.map((item, index) => {
+            const isActive = selectedProjectId === item.id;
+
+            let fill = BAR_COLORS[index % BAR_COLORS.length];
+
+            if (hasSelectedProject) {
+              fill = isActive ? ACTIVE_BAR_COLOR : DEFAULT_BAR_COLOR;
+            }
+
+            return (
+              <Cell
+                key={`${item.name}-${index}`}
+                fill={fill}
+                fillOpacity={hasSelectedProject && !isActive ? 0.45 : 1}
+              />
+            );
+          })}
         </Bar>
       </BarChart>
     </ResponsiveContainer>

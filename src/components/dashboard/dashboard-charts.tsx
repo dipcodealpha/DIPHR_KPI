@@ -119,17 +119,32 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
     return summaryItems.length > 0 ? summaryItems.join(" · ") : "전체 조건";
   }, [selected.year, selected.manager, selected.status]);
 
+  const selectedProjectName = useMemo(() => {
+    if (!selected.projectId) return "";
+
+    const foundProject =
+      charts.byProject.find((item) => item.id === selected.projectId) ??
+      charts.byProjectParticipants.find((item) => item.id === selected.projectId);
+
+    return foundProject?.name ?? "";
+  }, [charts.byProject, charts.byProjectParticipants, selected.projectId]);
+
   const handleSelectProject = (projectId: string) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    if (projectId) {
-      params.set("projectId", projectId);
-    } else {
+    if (selected.projectId === projectId) {
       params.delete("projectId");
+    } else {
+      params.set("projectId", projectId);
     }
 
-    router.push(`${pathname}?${params.toString()}`);
+    const nextQuery = params.toString();
+    router.push(nextQuery ? `${pathname}?${nextQuery}` : pathname);
   };
+
+  const projectMeta = selected.projectId
+    ? `선택 사업: ${selectedProjectName || "현재 선택됨"}`
+    : "클릭하여 사업 필터 적용";
 
   return (
     <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
@@ -162,8 +177,8 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <ChartCard
         eyebrow="PROJECT"
         title="사업별 교육건수"
-        description="운영 건수가 큰 순서대로 비교합니다. 막대를 클릭하면 해당 사업으로 필터링됩니다."
-        meta={selected.projectId ? "사업 선택 적용됨" : "클릭하여 사업 필터 적용"}
+        description="운영 건수가 큰 순서대로 비교합니다. 같은 막대를 다시 클릭하면 사업 선택이 해제됩니다."
+        meta={projectMeta}
       >
         {charts.byProject.length === 0 ? (
           <EmptyChart />
@@ -171,6 +186,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
           <ProjectBarChart
             data={charts.byProject}
             valueLabel="교육건수"
+            selectedProjectId={selected.projectId}
             onSelectProject={handleSelectProject}
           />
         )}
@@ -179,8 +195,8 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <ChartCard
         eyebrow="PROJECT"
         title="사업별 수료자 수"
-        description="누적 수료자 수가 큰 순서대로 비교합니다. 막대를 클릭하면 해당 사업으로 필터링됩니다."
-        meta={selected.projectId ? "사업 선택 적용됨" : "클릭하여 사업 필터 적용"}
+        description="누적 수료자 수가 큰 순서대로 비교합니다. 같은 막대를 다시 클릭하면 사업 선택이 해제됩니다."
+        meta={projectMeta}
       >
         {charts.byProjectParticipants.length === 0 ? (
           <EmptyChart />
@@ -188,6 +204,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
           <ProjectBarChart
             data={charts.byProjectParticipants}
             valueLabel="수료자 수"
+            selectedProjectId={selected.projectId}
             onSelectProject={handleSelectProject}
           />
         )}
