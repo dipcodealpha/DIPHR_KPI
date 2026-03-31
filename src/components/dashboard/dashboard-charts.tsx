@@ -149,6 +149,32 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
   return (
     <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
       <ChartCard
+        eyebrow="SUMMARY"
+        title="실시연도별 교육건수"
+        description="교육 시작일 기준 연도별 운영 건수 요약"
+        meta="보조 요약 차트"
+      >
+        {charts.byYear.length === 0 ? (
+          <EmptyChart />
+        ) : (
+          <SummaryBarChart data={charts.byYear} valueLabel="교육건수" />
+        )}
+      </ChartCard>
+
+      <ChartCard
+        eyebrow="SUMMARY"
+        title="실시연도별 수료자 수"
+        description="교육 시작일 기준 연도별 누적 수료자 수 요약"
+        meta="보조 요약 차트"
+      >
+        {charts.byYearParticipants.length === 0 ? (
+          <EmptyChart />
+        ) : (
+          <SummaryBarChart data={charts.byYearParticipants} valueLabel="수료자 수" />
+        )}
+      </ChartCard>
+
+      <ChartCard
         eyebrow="TREND"
         title="월별 교육건수"
         description="사업연도 조건에 해당하는 교육의 시작일 기준 월별 교육 건수"
@@ -207,32 +233,6 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
             selectedProjectId={selected.projectId}
             onSelectProject={handleSelectProject}
           />
-        )}
-      </ChartCard>
-
-      <ChartCard
-        eyebrow="SUMMARY"
-        title="실시연도별 교육건수"
-        description="교육 시작일 기준 연도별 운영 건수 요약"
-        meta="보조 요약 차트"
-      >
-        {charts.byYear.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <SummaryBarChart data={charts.byYear} valueLabel="교육건수" />
-        )}
-      </ChartCard>
-
-      <ChartCard
-        eyebrow="SUMMARY"
-        title="실시연도별 수료자 수"
-        description="교육 시작일 기준 연도별 누적 수료자 수 요약"
-        meta="보조 요약 차트"
-      >
-        {charts.byYearParticipants.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <SummaryBarChart data={charts.byYearParticipants} valueLabel="수료자 수" />
         )}
       </ChartCard>
     </div>
