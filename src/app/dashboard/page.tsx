@@ -3,10 +3,7 @@ import { DashboardFilters } from "@/components/dashboard/dashboard-filters";
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 import { DashboardTables } from "@/components/dashboard/dashboard-tables";
 import { MessageBox } from "@/components/ui/message-box";
-import {
-  getDashboardData,
-  type DashboardKpiComparisonValue
-} from "@/lib/dashboard";
+import { getDashboardData } from "@/lib/dashboard";
 import { formatNumber } from "@/lib/format";
 
 interface DashboardPageProps {
@@ -16,38 +13,6 @@ interface DashboardPageProps {
     manager?: string;
     status?: string;
   }>;
-}
-
-function getComparisonTrend(comparison: DashboardKpiComparisonValue) {
-  const { baseline, current } = comparison;
-
-  if (baseline === 0) {
-    return {
-      label: "비교 없음",
-      direction: "neutral" as const
-    };
-  }
-
-  const ratio = Math.round((current / baseline) * 100);
-
-  if (current > baseline) {
-    return {
-      label: `${ratio}%`,
-      direction: "up" as const
-    };
-  }
-
-  if (current < baseline) {
-    return {
-      label: `${ratio}%`,
-      direction: "down" as const
-    };
-  }
-
-  return {
-    label: "100%",
-    direction: "neutral" as const
-  };
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
@@ -83,7 +48,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="운영 현황"
           title="총 교육 수"
           value={`${formatNumber(data.kpi.totalPrograms)}건`}
-          trend={getComparisonTrend(data.comparisons.totalPrograms)}
           subValue={
             data.kpi.totalProjects > 0
               ? `${formatNumber(data.kpi.totalProjects)}개 사업 기준`
@@ -96,7 +60,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="성과 지표"
           title="총 수료자 수"
           value={`${formatNumber(data.kpi.totalCompletionCount)}명`}
-          trend={getComparisonTrend(data.comparisons.totalCompletionCount)}
           subValue={
             data.kpi.totalPrograms > 0
               ? `${formatNumber(data.kpi.totalPrograms)}개 교육 기준`
@@ -121,7 +84,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="운영 규모"
           title="총 교육시수"
           value={`${formatNumber(data.kpi.totalHours)}시간`}
-          trend={getComparisonTrend(data.comparisons.totalHours)}
           subValue={
             data.kpi.totalPrograms > 0
               ? `회당 평균 ${formatNumber(data.kpi.averageHoursPerProgram)}시간`

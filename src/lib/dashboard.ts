@@ -20,11 +20,6 @@ export interface DashboardKpi {
   averageHoursPerProgram: number;
 }
 
-export interface DashboardKpiComparisonValue {
-  baseline: number;
-  current: number;
-}
-
 export interface DashboardChartItem {
   id?: string;
   name: string;
@@ -66,11 +61,6 @@ export interface DashboardData {
     status: string;
   };
   kpi: DashboardKpi;
-  comparisons: {
-    totalPrograms: DashboardKpiComparisonValue;
-    totalHours: DashboardKpiComparisonValue;
-    totalCompletionCount: DashboardKpiComparisonValue;
-  };
   charts: {
     byYear: DashboardChartItem[];
     byYearParticipants: DashboardChartItem[];
@@ -283,15 +273,11 @@ export async function getDashboardData(
     )
   ).sort((a, b) => a.localeCompare(b, "ko"));
 
-  const baselinePrograms = allPrograms.filter((program) => {
+  const filteredPrograms = allPrograms.filter((program) => {
     if (selectedYear && String(program.project_year) !== selectedYear) {
       return false;
     }
 
-    return true;
-  });
-
-  const filteredPrograms = baselinePrograms.filter((program) => {
     if (selectedProjectId && program.project_id !== selectedProjectId) {
       return false;
     }
@@ -316,22 +302,6 @@ export async function getDashboardData(
   const programNameMap = new Map(allPrograms.map((program) => [program.id, program.program_name]));
 
   const kpi = buildDashboardKpi(filteredPrograms, projects);
-  const baselineKpi = buildDashboardKpi(baselinePrograms, projects);
-
-  const comparisons = {
-    totalPrograms: {
-      baseline: baselineKpi.totalPrograms,
-      current: kpi.totalPrograms
-    },
-    totalHours: {
-      baseline: baselineKpi.totalHours,
-      current: kpi.totalHours
-    },
-    totalCompletionCount: {
-      baseline: baselineKpi.totalCompletionCount,
-      current: kpi.totalCompletionCount
-    }
-  };
 
   const byYearMap = new Map<string, number>();
   const byYearParticipantsMap = new Map<string, number>();
@@ -433,7 +403,6 @@ export async function getDashboardData(
       status: selectedStatus
     },
     kpi,
-    comparisons,
     charts,
     lists: {
       scheduled,
