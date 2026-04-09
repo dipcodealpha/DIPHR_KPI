@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { PageTitle } from "@/components/ui/page-title";
 import { MessageBox } from "@/components/ui/message-box";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { listPrograms } from "@/lib/programs";
 import { buildCsv, buildDataUrl } from "@/lib/csv";
 import { formatDate, formatDateTime, getProgramStatus } from "@/lib/format";
-import { StatusBadge } from "@/components/ui/status-badge";
 
 interface ProgramsPageProps {
   searchParams?: Promise<{
     success?: string;
     q?: string;
+    project?: string;
   }>;
 }
 
@@ -29,6 +30,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const successMessage = getSuccessMessage(resolvedSearchParams.success);
   const keyword = resolvedSearchParams.q?.trim() ?? "";
+  const selectedProject = resolvedSearchParams.project?.trim() ?? "";
 
   let programs;
 
@@ -47,20 +49,34 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
     );
   }
 
-  const filteredPrograms = keyword
-    ? programs.filter((program) => {
-        const normalizedKeyword = keyword.toLocaleLowerCase("ko-KR");
-        const searchTarget = [
-          program.program_name,
-          program.project_name ?? "",
-          program.manager_name
-        ]
-          .join(" ")
-          .toLocaleLowerCase("ko-KR");
+  const projectOptions = Array.from(
+    new Set(
+      programs
+        .map((program) => program.project_name?.trim())
+        .filter((projectName): projectName is string => Boolean(projectName))
+    )
+  ).sort((a, b) => a.localeCompare(b, "ko"));
 
-        return searchTarget.includes(normalizedKeyword);
-      })
-    : programs;
+  const filteredPrograms = programs.filter((program) => {
+    if (selectedProject && program.project_name !== selectedProject) {
+      return false;
+    }
+
+    if (!keyword) {
+      return true;
+    }
+
+    const normalizedKeyword = keyword.toLocaleLowerCase("ko-KR");
+    const searchTarget = [
+      program.program_name,
+      program.project_name ?? "",
+      program.manager_name
+    ]
+      .join(" ")
+      .toLocaleLowerCase("ko-KR");
+
+    return searchTarget.includes(normalizedKeyword);
+  });
 
   const csvRows = filteredPrograms.map((program) => ({
     연도: program.project_year ?? "",
@@ -93,6 +109,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
   ]);
 
   const csvDownloadUrl = buildDataUrl(csv);
+  const hasFilter = Boolean(keyword || selectedProject);
 
   return (
     <div className="space-y-6">
@@ -121,18 +138,39 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
       {successMessage ? <MessageBox tone="success" message={successMessage} /> : null}
 
       <form className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="w-full max-w-md space-y-2">
-            <label htmlFor="program-search" className="text-sm font-medium text-slate-700">
-              교육 검색
-            </label>
-            <input
-              id="program-search"
-              name="q"
-              defaultValue={keyword}
-              placeholder="교육명, 사업명, 담당자명으로 검색"
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-            />
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid w-full gap-3 md:grid-cols-2 lg:max-w-2xl">
+            <div className="space-y-2">
+              <label htmlFor="program-search" className="text-sm font-medium text-slate-700">
+                교육 검색
+              </label>
+              <input
+                id="program-search"
+                name="q"
+                defaultValue={keyword}
+                placeholder="교육명, 사업명, 담당자명으로 검색"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="program-project" className="text-sm font-medium text-slate-700">
+                사업 선택
+              </label>
+              <select
+                id="program-project"
+                name="project"
+                defaultValue={selectedProject}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
+              >
+                <option value="">전체 사업</option>
+                {projectOptions.map((projectName) => (
+                  <option key={projectName} value={projectName}>
+                    {projectName}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex gap-2">
@@ -155,10 +193,10 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
       {filteredPrograms.length === 0 ? (
         <MessageBox
           tone="info"
-          title={keyword ? "검색 결과가 없습니다." : "등록된 교육이 없습니다."}
+          title={hasFilter ? "검색 결과가 없습니다." : "등록된 교육이 없습니다."}
           message={
-            keyword
-              ? "검색어를 바꾸거나 초기화 후 다시 확인해 주세요."
+            hasFilter
+              ? "검색어 또는 사업 선택을 바꾸거나 초기화 후 다시 확인해 주세요."
               : "우측 상단의 교육 등록 버튼으로 첫 교육을 추가해 주세요."
           }
         />
