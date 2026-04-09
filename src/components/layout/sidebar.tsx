@@ -2,28 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const navigationItems = [
-  {
-    href: "/dashboard",
-    label: "대시보드",
-    matchers: ["/dashboard"]
-  },
-  {
-    href: "/projects",
-    label: "사업 관리",
-    matchers: ["/projects"]
-  },
-  {
-    href: "/programs",
-    label: "교육 관리",
-    matchers: ["/programs"]
-  }
-];
-
-function isActivePath(pathname: string, matchers: string[]) {
-  return matchers.some((matcher) => pathname === matcher || pathname.startsWith(`${matcher}/`));
-}
+import { isActivePath, navigationItems } from "@/components/layout/navigation-items";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -35,10 +14,10 @@ export function Sidebar() {
           Integrated Admin
         </div>
         <div className="mt-2 text-xl font-semibold tracking-[-0.02em] text-white">
-          내부 관리도구
+          통합 관리도구
         </div>
         <div className="mt-1 text-sm leading-6 text-slate-300">
-          사업 · 교육 · 성과 통합 관리
+          사업, 교육, 성과 통합 관리
         </div>
       </div>
 

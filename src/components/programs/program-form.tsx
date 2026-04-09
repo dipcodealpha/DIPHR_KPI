@@ -140,7 +140,7 @@ export function ProgramForm({
           required
         >
           <option value="" disabled>
-            사업을 선택하세요
+            사업을 선택해 주세요.
           </option>
           {projectOptions.map((project) => (
             <option key={project.id} value={project.id}>
@@ -157,13 +157,20 @@ export function ProgramForm({
           value={programName}
           onChange={(event) => setProgramName(event.target.value)}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-          placeholder="교육명을 입력하세요"
+          placeholder="교육명을 입력해 주세요."
+          aria-describedby="program-form-status"
           required
         />
       </div>
 
-      {(duplicateMessage || duplicateErrorMessage || isCheckingDuplicate) && (
-        <div className="md:col-span-2">
+      {(duplicateMessage || duplicateErrorMessage || isCheckingDuplicate) ? (
+        <div
+          id="program-form-status"
+          className="md:col-span-2"
+          role={duplicateErrorMessage ? "alert" : "status"}
+          aria-live={duplicateErrorMessage ? "assertive" : "polite"}
+          aria-atomic="true"
+        >
           {isCheckingDuplicate ? (
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               중복 여부를 확인하는 중입니다...
@@ -172,7 +179,7 @@ export function ProgramForm({
 
           {duplicateMessage ? (
             <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              중복 경고: {duplicateMessage} 저장은 가능하지만 기존 교육과 중복 여부를 확인하세요.
+              중복 경고: {duplicateMessage} 등록은 가능하지만 기존 교육과 중복 여부를 확인해 주세요.
             </div>
           ) : null}
 
@@ -181,6 +188,10 @@ export function ProgramForm({
               {duplicateErrorMessage}
             </div>
           ) : null}
+        </div>
+      ) : (
+        <div id="program-form-status" className="sr-only" aria-live="polite" aria-atomic="true">
+          교육 등록 상태 메시지 영역
         </div>
       )}
 
@@ -204,12 +215,20 @@ export function ProgramForm({
           value={endDate}
           onChange={(event) => setEndDate(event.target.value)}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+          aria-invalid={invalidDateRange ? "true" : "false"}
+          aria-describedby={invalidDateRange ? "program-form-date-error" : undefined}
           required
         />
       </div>
 
       {invalidDateRange ? (
-        <div className="md:col-span-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          id="program-form-date-error"
+          className="md:col-span-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
           종료일은 시작일보다 빠를 수 없습니다.
         </div>
       ) : null}
@@ -224,7 +243,7 @@ export function ProgramForm({
           value={hours}
           onChange={(event) => setHours(event.target.value)}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-          placeholder="1 이상 정수"
+          placeholder="1 이상의 정수"
           required
         />
       </div>
@@ -250,7 +269,7 @@ export function ProgramForm({
           value={managerName}
           onChange={(event) => setManagerName(event.target.value)}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-          placeholder="담당자명을 입력하세요"
+          placeholder="담당자명을 입력해 주세요."
           required
         />
       </div>
@@ -263,7 +282,7 @@ export function ProgramForm({
             value={createdByName}
             onChange={(event) => setCreatedByName(event.target.value)}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-            placeholder="최초입력자명을 입력하세요"
+            placeholder="최초입력자명을 입력해 주세요."
             required
           />
         </div>
@@ -275,7 +294,7 @@ export function ProgramForm({
             value={updatedByName}
             onChange={(event) => setUpdatedByName(event.target.value)}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-            placeholder="최종수정자명을 입력하세요"
+            placeholder="최종수정자명을 입력해 주세요."
             required
           />
         </div>
@@ -289,7 +308,7 @@ export function ProgramForm({
           value={note}
           onChange={(event) => setNote(event.target.value)}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-          placeholder="추가 메모가 있으면 입력하세요"
+          placeholder="추가 메모가 있으면 입력해 주세요."
         />
       </div>
 

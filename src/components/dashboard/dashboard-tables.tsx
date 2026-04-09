@@ -1,4 +1,5 @@
 import { formatDate, formatDateTime, formatNumber } from "@/lib/format";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { DashboardData } from "@/lib/dashboard";
 
 interface DashboardTablesProps {
@@ -28,10 +29,14 @@ function EmptyState({ message }: { message: string }) {
 
 function TableSection({
   title,
+  statusLabel,
+  statusTone,
   description,
   rows
 }: {
   title: string;
+  statusLabel?: string;
+  statusTone?: "success" | "warning";
   description?: string;
   rows: DashboardData["lists"]["scheduled"] | DashboardData["lists"]["completed"];
 }) {
@@ -41,7 +46,12 @@ function TableSection({
         <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
           PROGRAM LIST
         </div>
-        <h3 className="mt-2 text-base font-semibold text-slate-900">{title}</h3>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+          {statusLabel && statusTone ? (
+            <StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>
+          ) : null}
+        </div>
         {description ? (
           <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
         ) : null}
@@ -100,11 +110,15 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <TableSection
           title="예정 교육 목록"
+          statusLabel="예정"
+          statusTone="warning"
           description="아직 수료 처리되지 않은 교육 목록입니다."
           rows={lists.scheduled}
         />
         <TableSection
           title="완료 교육 목록"
+          statusLabel="완료"
+          statusTone="success"
           description="수료 처리된 교육 목록입니다."
           rows={lists.completed}
         />

@@ -25,9 +25,9 @@ function getTrendTone(direction?: "up" | "down" | "neutral") {
 }
 
 function getTrendIcon(direction?: "up" | "down" | "neutral") {
-  if (direction === "up") return "▲";
-  if (direction === "down") return "▼";
-  return "•";
+  if (direction === "up") return "+";
+  if (direction === "down") return "-";
+  return "=";
 }
 
 export function KpiCard({

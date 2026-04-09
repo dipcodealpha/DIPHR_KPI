@@ -16,8 +16,16 @@ export function MessageBox({
   title,
   message
 }: MessageBoxProps) {
+  const liveMode = tone === "error" || tone === "warning" ? "assertive" : "polite";
+  const role = tone === "error" || tone === "warning" ? "alert" : "status";
+
   return (
-    <div className={`rounded-xl border px-4 py-3 text-sm ${toneClassMap[tone]}`}>
+    <div
+      role={role}
+      aria-live={liveMode}
+      aria-atomic="true"
+      className={`rounded-xl border px-4 py-3 text-sm ${toneClassMap[tone]}`}
+    >
       {title ? <p className="font-semibold leading-6">{title}</p> : null}
       <p className={title ? "mt-1 leading-6" : "leading-6"}>{message}</p>
     </div>

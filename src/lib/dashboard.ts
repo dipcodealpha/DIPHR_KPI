@@ -20,6 +20,11 @@ export interface DashboardKpi {
   averageHoursPerProgram: number;
 }
 
+export interface DashboardKpiComparisonValue {
+  baseline: number;
+  current: number;
+}
+
 export interface DashboardChartItem {
   id?: string;
   name: string;
@@ -61,6 +66,11 @@ export interface DashboardData {
     status: string;
   };
   kpi: DashboardKpi;
+  comparisons: {
+    totalPrograms: DashboardKpiComparisonValue;
+    totalHours: DashboardKpiComparisonValue;
+    totalCompletionCount: DashboardKpiComparisonValue;
+  };
   charts: {
     byYear: DashboardChartItem[];
     byYearParticipants: DashboardChartItem[];
@@ -82,6 +92,21 @@ interface GetDashboardDataParams {
   manager?: string;
   status?: string;
 }
+
+type DashboardProgramSource = ProgramRow & {
+  projects?: {
+    id: string;
+    project_year: number;
+    project_name: string;
+    is_active?: boolean;
+  } | null;
+};
+
+type DashboardProgram = ProgramRow & {
+  project_year: number;
+  project_name: string;
+  status: "예정" | "완료";
+};
 
 function getProgramStatus(completionCount: number | null): "예정" | "완료" {
   return completionCount === null ? "예정" : "완료";
@@ -146,6 +171,26 @@ function getAuditTargetName(
   return null;
 }
 
+function buildDashboardKpi(programs: DashboardProgram[], projects: ProjectRow[]): DashboardKpi {
+  const relatedProjectIds = new Set(programs.map((program) => program.project_id));
+  const totalPrograms = programs.length;
+  const totalHours = programs.reduce((sum, program) => sum + toNumber(program.hours), 0);
+  const totalCompletionCount = programs.reduce(
+    (sum, program) => sum + toNumber(program.completion_count),
+    0
+  );
+
+  return {
+    totalProjects: projects.filter((project) => relatedProjectIds.has(project.id)).length,
+    totalPrograms,
+    totalHours,
+    totalCompletionCount,
+    averageCompletionPerProgram:
+      totalPrograms > 0 ? Number((totalCompletionCount / totalPrograms).toFixed(1)) : 0,
+    averageHoursPerProgram: totalPrograms > 0 ? Number((totalHours / totalPrograms).toFixed(1)) : 0
+  };
+}
+
 export async function getDashboardData(
   params: GetDashboardDataParams = {}
 ): Promise<DashboardData> {
@@ -197,23 +242,16 @@ export async function getDashboardData(
 
   const projects = (projectsResult.data ?? []) as ProjectRow[];
 
-  const allPrograms = ((programsResult.data ?? []) as Array<
-    ProgramRow & {
-      projects?: {
-        id: string;
-        project_year: number;
-        project_name: string;
-        is_active?: boolean;
-      } | null;
-    }
-  >)
+  const allPrograms = ((programsResult.data ?? []) as DashboardProgramSource[])
     .filter((program) => program.projects)
-    .map((program) => ({
-      ...program,
-      project_year: program.projects?.project_year ?? 0,
-      project_name: program.projects?.project_name ?? "",
-      status: getProgramStatus(program.completion_count)
-    }));
+    .map(
+      (program): DashboardProgram => ({
+        ...program,
+        project_year: program.projects?.project_year ?? 0,
+        project_name: program.projects?.project_name ?? "",
+        status: getProgramStatus(program.completion_count)
+      })
+    );
 
   const filterYears = Array.from(
     new Set(
@@ -223,7 +261,16 @@ export async function getDashboardData(
     )
   ).sort((a, b) => b - a);
 
-  const filterProjects = projects.map((project) => ({
+  const selectedYear = params.year?.trim() ?? "";
+  const selectedProjectId = params.projectId?.trim() ?? "";
+  const selectedManager = params.manager?.trim() ?? "";
+  const selectedStatus = params.status?.trim() ?? "";
+
+  const projectOptionsSource = selectedYear
+    ? projects.filter((project) => String(project.project_year) === selectedYear)
+    : projects;
+
+  const filterProjects = projectOptionsSource.map((project) => ({
     id: project.id,
     label: `${project.project_year} / ${project.project_name}`
   }));
@@ -236,16 +283,15 @@ export async function getDashboardData(
     )
   ).sort((a, b) => a.localeCompare(b, "ko"));
 
-  const selectedYear = params.year?.trim() ?? "";
-  const selectedProjectId = params.projectId?.trim() ?? "";
-  const selectedManager = params.manager?.trim() ?? "";
-  const selectedStatus = params.status?.trim() ?? "";
-
-  const filteredPrograms = allPrograms.filter((program) => {
+  const baselinePrograms = allPrograms.filter((program) => {
     if (selectedYear && String(program.project_year) !== selectedYear) {
       return false;
     }
 
+    return true;
+  });
+
+  const filteredPrograms = baselinePrograms.filter((program) => {
     if (selectedProjectId && program.project_id !== selectedProjectId) {
       return false;
     }
@@ -262,7 +308,6 @@ export async function getDashboardData(
   });
 
   const relatedProjectIds = new Set(filteredPrograms.map((program) => program.project_id));
-  const filteredProjects = projects.filter((project) => relatedProjectIds.has(project.id));
   const filteredProgramIds = new Set(filteredPrograms.map((program) => program.id));
 
   const projectNameMap = new Map(
@@ -270,21 +315,22 @@ export async function getDashboardData(
   );
   const programNameMap = new Map(allPrograms.map((program) => [program.id, program.program_name]));
 
-  const totalPrograms = filteredPrograms.length;
-  const totalHours = filteredPrograms.reduce((sum, program) => sum + toNumber(program.hours), 0);
-  const totalCompletionCount = filteredPrograms.reduce(
-    (sum, program) => sum + toNumber(program.completion_count),
-    0
-  );
+  const kpi = buildDashboardKpi(filteredPrograms, projects);
+  const baselineKpi = buildDashboardKpi(baselinePrograms, projects);
 
-  const kpi: DashboardKpi = {
-    totalProjects: filteredProjects.length,
-    totalPrograms,
-    totalHours,
-    totalCompletionCount,
-    averageCompletionPerProgram:
-      totalPrograms > 0 ? Number((totalCompletionCount / totalPrograms).toFixed(1)) : 0,
-    averageHoursPerProgram: totalPrograms > 0 ? Number((totalHours / totalPrograms).toFixed(1)) : 0
+  const comparisons = {
+    totalPrograms: {
+      baseline: baselineKpi.totalPrograms,
+      current: kpi.totalPrograms
+    },
+    totalHours: {
+      baseline: baselineKpi.totalHours,
+      current: kpi.totalHours
+    },
+    totalCompletionCount: {
+      baseline: baselineKpi.totalCompletionCount,
+      current: kpi.totalCompletionCount
+    }
   };
 
   const byYearMap = new Map<string, number>();
@@ -344,13 +390,8 @@ export async function getDashboardData(
     )
   };
 
-  const scheduled = filteredPrograms
-    .filter((program) => program.status === "예정")
-    .slice(0, 20);
-
-  const completed = filteredPrograms
-    .filter((program) => program.status === "완료")
-    .slice(0, 20);
+  const scheduled = filteredPrograms.filter((program) => program.status === "예정").slice(0, 20);
+  const completed = filteredPrograms.filter((program) => program.status === "완료").slice(0, 20);
 
   const recentAuditLogs = ((auditLogsResult.data ?? []) as Array<{
     id: string;
@@ -392,6 +433,7 @@ export async function getDashboardData(
       status: selectedStatus
     },
     kpi,
+    comparisons,
     charts,
     lists: {
       scheduled,

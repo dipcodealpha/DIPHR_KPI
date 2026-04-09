@@ -24,6 +24,9 @@ export function DashboardFilters({
         <p className="mt-2 text-sm font-medium text-slate-800">
           사업연도와 조건을 선택한 뒤 대시보드 결과를 확인합니다.
         </p>
+        <p className="mt-1 text-xs text-slate-500">
+          KPI 비교 배지는 선택한 연도 전체 기준 대비 현재 조건 비율입니다.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">

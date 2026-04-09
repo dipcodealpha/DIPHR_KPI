@@ -53,10 +53,7 @@ export function AccessForm({ redirectTo }: AccessFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-slate-700"
-        >
+        <label htmlFor="password" className="block text-sm font-medium text-slate-700">
           비밀번호
         </label>
         <input
@@ -65,16 +62,24 @@ export function AccessForm({ redirectTo }: AccessFormProps) {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="비밀번호를 입력하세요"
+          placeholder="비밀번호를 입력해 주세요."
           autoComplete="current-password"
+          aria-invalid={errorMessage ? "true" : "false"}
+          aria-describedby={errorMessage ? "access-form-error" : undefined}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none ring-0 placeholder:text-slate-400 focus:border-slate-400"
           required
         />
       </div>
 
-      {errorMessage ? (
-        <p className="text-sm text-red-600">{errorMessage}</p>
-      ) : null}
+      <div
+        id="access-form-error"
+        role={errorMessage ? "alert" : "status"}
+        aria-live="assertive"
+        aria-atomic="true"
+        className={errorMessage ? "text-sm text-red-600" : "sr-only"}
+      >
+        {errorMessage || "접근 오류 메시지 영역"}
+      </div>
 
       <button
         type="submit"
