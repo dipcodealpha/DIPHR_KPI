@@ -3,6 +3,7 @@
 interface ProjectDeactivateFormProps {
   action: (formData: FormData) => void | Promise<void>;
   id: string;
+  projectName?: string;
   redirectTo: string;
   compact?: boolean;
 }
@@ -10,10 +11,16 @@ interface ProjectDeactivateFormProps {
 export function ProjectDeactivateForm({
   action,
   id,
+  projectName,
   redirectTo,
   compact = false
 }: ProjectDeactivateFormProps) {
-  const confirmMessage = "정말로 이 사업을 비활성화하시겠습니까?";
+  const targetName = projectName?.trim() || "선택한 사업";
+  const confirmMessage = [
+    `"${targetName}" 사업을 비활성화하시겠습니까?`,
+    "비활성화 후에는 새 교육 등록의 사업 선택 목록에서 제외되며, 활성 사업만 보는 화면에서 보이지 않을 수 있습니다.",
+    "기존 데이터는 삭제되지 않지만, 되돌리기 기능은 현재 화면에 없습니다."
+  ].join("\n\n");
 
   return (
     <form

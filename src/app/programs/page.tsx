@@ -6,6 +6,9 @@ import { listPrograms } from "@/lib/programs";
 import { buildCsv, buildDataUrl } from "@/lib/csv";
 import { formatDate, formatDateTime, getProgramStatus } from "@/lib/format";
 
+const DATA_QUERY_GUIDANCE =
+  "Supabase 프로젝트가 일시 중지되었거나 Vercel 환경변수, 네트워크, DB 조회 권한에 문제가 있을 수 있습니다. Supabase 프로젝트 상태와 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY 값을 확인해 주세요.";
+
 interface ProgramsPageProps {
   searchParams?: Promise<{
     success?: string;
@@ -43,7 +46,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
         <MessageBox
           tone="error"
           title="교육 목록을 불러오지 못했습니다."
-          message={error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."}
+          message={`${error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."} ${DATA_QUERY_GUIDANCE}`}
         />
       </div>
     );
@@ -197,11 +200,14 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
           message={
             hasFilter
               ? "검색어 또는 사업 선택을 바꾸거나 초기화 후 다시 확인해 주세요."
-              : "우측 상단의 교육 등록 버튼으로 첫 교육을 추가해 주세요."
+              : "먼저 활성 사업이 있는지 확인한 뒤 우측 상단의 교육 등록 버튼으로 첫 교육을 추가해 주세요."
           }
         />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <p className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 lg:hidden">
+            표가 화면보다 넓으면 좌우로 스크롤해 모든 열을 확인할 수 있습니다.
+          </p>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 text-slate-600">

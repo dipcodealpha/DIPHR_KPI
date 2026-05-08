@@ -8,6 +8,9 @@ import { formatDateTime } from "@/lib/format";
 import { listProjects } from "@/lib/projects";
 import { deactivateProjectAction } from "@/app/projects/actions";
 
+const DATA_QUERY_GUIDANCE =
+  "Supabase 프로젝트가 일시 중지되었거나 Vercel 환경변수, 네트워크, DB 조회 권한에 문제가 있을 수 있습니다. Supabase 프로젝트 상태와 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY 값을 확인해 주세요.";
+
 interface ProjectsPageProps {
   searchParams?: Promise<{
     success?: string;
@@ -45,7 +48,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         <MessageBox
           tone="error"
           title="사업 목록 조회 실패"
-          message={error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."}
+          message={`${error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."} ${DATA_QUERY_GUIDANCE}`}
         />
       </div>
     );
@@ -103,10 +106,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         {projects.length === 0 ? (
           <MessageBox
             tone="info"
-            message="등록된 사업이 없습니다. 우측 상단의 사업 등록 버튼으로 추가해 주세요."
+            message="등록된 사업이 없습니다. 교육을 등록하려면 먼저 우측 상단의 사업 등록 버튼으로 활성 사업을 추가해 주세요."
           />
         ) : (
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <p className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 lg:hidden">
+              표가 화면보다 넓으면 좌우로 스크롤해 모든 열을 확인할 수 있습니다.
+            </p>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="bg-slate-50 text-slate-600">
@@ -160,6 +166,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                           <ProjectDeactivateForm
                             action={deactivateProjectAction}
                             id={project.id}
+                            projectName={project.project_name}
                             redirectTo="/projects"
                             compact
                           />

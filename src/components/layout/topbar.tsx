@@ -109,7 +109,9 @@ export function Topbar() {
             <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
               운영 상태
             </div>
-            <div className="mt-1 text-sm font-medium text-slate-700">정상 운영</div>
+            <div className="mt-1 text-sm font-medium text-slate-700">
+              조회 결과 기준 확인
+            </div>
           </div>
         </div>
       </header>

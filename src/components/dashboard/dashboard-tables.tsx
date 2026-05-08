@@ -27,6 +27,14 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+function TableScrollHint() {
+  return (
+    <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 lg:hidden">
+      표가 화면보다 넓으면 좌우로 스크롤해 모든 열을 확인할 수 있습니다.
+    </p>
+  );
+}
+
 function TableSection({
   title,
   statusLabel,
@@ -60,45 +68,48 @@ function TableSection({
       {rows.length === 0 ? (
         <EmptyState message="표시할 데이터가 없습니다." />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-100 text-slate-700">
-              <tr>
-                <th className="px-3 py-3 text-left font-semibold">사업</th>
-                <th className="px-3 py-3 text-left font-semibold">교육명</th>
-                <th className="px-3 py-3 text-left font-semibold">기간</th>
-                <th className="px-3 py-3 text-left font-semibold">시수</th>
-                <th className="px-3 py-3 text-left font-semibold">수료자 수</th>
-                <th className="px-3 py-3 text-left font-semibold">담당자</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((program) => (
-                <tr
-                  key={program.id}
-                  className="border-t border-slate-200 transition hover:bg-slate-50"
-                >
-                  <td className="px-3 py-3">
-                    {program.project_year} / {program.project_name}
-                  </td>
-                  <td className="px-3 py-3">{program.program_name}</td>
-                  <td className="px-3 py-3 whitespace-nowrap">
-                    {formatDate(program.start_date)} ~ {formatDate(program.end_date)}
-                  </td>
-                  <td className="px-3 py-3 whitespace-nowrap">
-                    {formatNumber(program.hours)}시간
-                  </td>
-                  <td className="px-3 py-3 whitespace-nowrap">
-                    {program.completion_count === null
-                      ? "-"
-                      : `${formatNumber(program.completion_count)}명`}
-                  </td>
-                  <td className="px-3 py-3">{program.manager_name}</td>
+        <>
+          <TableScrollHint />
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-slate-100 text-slate-700">
+                <tr>
+                  <th className="px-3 py-3 text-left font-semibold">사업</th>
+                  <th className="px-3 py-3 text-left font-semibold">교육명</th>
+                  <th className="px-3 py-3 text-left font-semibold">기간</th>
+                  <th className="px-3 py-3 text-left font-semibold">시수</th>
+                  <th className="px-3 py-3 text-left font-semibold">수료자 수</th>
+                  <th className="px-3 py-3 text-left font-semibold">담당자</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((program) => (
+                  <tr
+                    key={program.id}
+                    className="border-t border-slate-200 transition hover:bg-slate-50"
+                  >
+                    <td className="px-3 py-3">
+                      {program.project_year} / {program.project_name}
+                    </td>
+                    <td className="px-3 py-3">{program.program_name}</td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {formatDate(program.start_date)} ~ {formatDate(program.end_date)}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {formatNumber(program.hours)}시간
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {program.completion_count === null
+                        ? "-"
+                        : `${formatNumber(program.completion_count)}명`}
+                    </td>
+                    <td className="px-3 py-3">{program.manager_name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   );
@@ -140,35 +151,38 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
         {lists.recentAuditLogs.length === 0 ? (
           <EmptyState message="최근 수정 이력이 없습니다." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-slate-100 text-slate-700">
-                <tr>
-                  <th className="px-3 py-3 text-left font-semibold">대상</th>
-                  <th className="px-3 py-3 text-left font-semibold">대상명</th>
-                  <th className="px-3 py-3 text-left font-semibold">작업유형</th>
-                  <th className="px-3 py-3 text-left font-semibold">수정자</th>
-                  <th className="px-3 py-3 text-left font-semibold">수정일</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lists.recentAuditLogs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="border-t border-slate-200 transition hover:bg-slate-50"
-                  >
-                    <td className="px-3 py-3">{getTargetLabel(log.target_type)}</td>
-                    <td className="px-3 py-3">{log.target_name ?? "-"}</td>
-                    <td className="px-3 py-3">{getActionLabel(log.action_type)}</td>
-                    <td className="px-3 py-3">{log.changed_by_name}</td>
-                    <td className="px-3 py-3 whitespace-nowrap">
-                      {formatDateTime(log.changed_at)}
-                    </td>
+          <>
+            <TableScrollHint />
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-100 text-slate-700">
+                  <tr>
+                    <th className="px-3 py-3 text-left font-semibold">대상</th>
+                    <th className="px-3 py-3 text-left font-semibold">대상명</th>
+                    <th className="px-3 py-3 text-left font-semibold">작업유형</th>
+                    <th className="px-3 py-3 text-left font-semibold">수정자</th>
+                    <th className="px-3 py-3 text-left font-semibold">수정일</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {lists.recentAuditLogs.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="border-t border-slate-200 transition hover:bg-slate-50"
+                    >
+                      <td className="px-3 py-3">{getTargetLabel(log.target_type)}</td>
+                      <td className="px-3 py-3">{log.target_name ?? "-"}</td>
+                      <td className="px-3 py-3">{getActionLabel(log.action_type)}</td>
+                      <td className="px-3 py-3">{log.changed_by_name}</td>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        {formatDateTime(log.changed_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </div>

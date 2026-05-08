@@ -140,6 +140,7 @@ export default async function ProjectEditPage({
           <ProjectDeactivateForm
             action={deactivateProjectAction}
             id={project.id}
+            projectName={project.project_name}
             redirectTo="/projects"
           />
         ) : (

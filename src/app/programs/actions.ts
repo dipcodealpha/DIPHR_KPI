@@ -25,7 +25,7 @@ export async function createProgramAction(formData: FormData) {
 
   revalidatePath("/programs");
   revalidatePath("/programs/new");
-  redirect("/programs");
+  redirect("/programs?success=created");
 }
 
 export async function updateProgramAction(formData: FormData) {
@@ -46,5 +46,5 @@ export async function updateProgramAction(formData: FormData) {
 
   revalidatePath("/programs");
   revalidatePath(`/programs/${parsed.id}`);
-  redirect("/programs");
+  redirect("/programs?success=updated");
 }
