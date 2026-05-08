@@ -20,6 +20,11 @@ export interface DashboardKpi {
   averageHoursPerProgram: number;
 }
 
+export interface DashboardKpiComparison {
+  basisLabel: string;
+  kpi: DashboardKpi;
+}
+
 export interface DashboardChartItem {
   id?: string;
   name: string;
@@ -61,6 +66,7 @@ export interface DashboardData {
     status: string;
   };
   kpi: DashboardKpi;
+  kpiComparison: DashboardKpiComparison;
   charts: {
     byYear: DashboardChartItem[];
     byYearParticipants: DashboardChartItem[];
@@ -302,6 +308,13 @@ export async function getDashboardData(
   const programNameMap = new Map(allPrograms.map((program) => [program.id, program.program_name]));
 
   const kpi = buildDashboardKpi(filteredPrograms, projects);
+  const comparisonPrograms = selectedYear
+    ? allPrograms.filter((program) => String(program.project_year) === selectedYear)
+    : allPrograms;
+  const kpiComparison = {
+    basisLabel: selectedYear ? "동일 연도 전체 기준" : "전체 기간 기준",
+    kpi: buildDashboardKpi(comparisonPrograms, projects)
+  };
 
   const byYearMap = new Map<string, number>();
   const byYearParticipantsMap = new Map<string, number>();
@@ -403,6 +416,7 @@ export async function getDashboardData(
       status: selectedStatus
     },
     kpi,
+    kpiComparison,
     charts,
     lists: {
       scheduled,

@@ -18,6 +18,63 @@ interface DashboardPageProps {
   }>;
 }
 
+function formatDecimal(value: number) {
+  return new Intl.NumberFormat("ko-KR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
+  }).format(value);
+}
+
+function formatSignedDecimal(value: number) {
+  const rounded = Number(value.toFixed(1));
+
+  if (rounded === 0) {
+    return "0.0";
+  }
+
+  return `${rounded > 0 ? "+" : "-"}${formatDecimal(Math.abs(rounded))}`;
+}
+
+function buildTotalComparisonText({
+  basisLabel,
+  current,
+  total,
+  unit
+}: {
+  basisLabel: string;
+  current: number;
+  total: number;
+  unit: string;
+}) {
+  if (total <= 0) {
+    return `${basisLabel}: 비교 기준 없음`;
+  }
+
+  const ratio = (current / total) * 100;
+
+  return `${basisLabel}: ${formatNumber(total)}${unit} 중 ${formatNumber(current)}${unit} · ${formatDecimal(ratio)}%`;
+}
+
+function buildAverageComparisonText({
+  basisLabel,
+  current,
+  average,
+  unit
+}: {
+  basisLabel: string;
+  current: number;
+  average: number;
+  unit: string;
+}) {
+  if (average <= 0) {
+    return `${basisLabel}: 비교 기준 없음`;
+  }
+
+  const difference = current - average;
+
+  return `${basisLabel}: 전체 평균 ${formatDecimal(average)}${unit} 대비 ${formatSignedDecimal(difference)}${unit}`;
+}
+
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
 
@@ -42,6 +99,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
+  const comparisonBasisLabel = data.kpiComparison.basisLabel;
+  const comparisonKpi = data.kpiComparison.kpi;
+
   return (
     <div className="space-y-6">
       <DashboardFilters filters={data.filters} selected={data.selected} />
@@ -51,6 +111,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="운영 현황"
           title="총 교육 수"
           value={`${formatNumber(data.kpi.totalPrograms)}건`}
+          comparison={buildTotalComparisonText({
+            basisLabel: comparisonBasisLabel,
+            current: data.kpi.totalPrograms,
+            total: comparisonKpi.totalPrograms,
+            unit: "건"
+          })}
           subValue={
             data.kpi.totalProjects > 0
               ? `${formatNumber(data.kpi.totalProjects)}개 사업 기준`
@@ -63,6 +129,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="성과 지표"
           title="총 수료자 수"
           value={`${formatNumber(data.kpi.totalCompletionCount)}명`}
+          comparison={buildTotalComparisonText({
+            basisLabel: comparisonBasisLabel,
+            current: data.kpi.totalCompletionCount,
+            total: comparisonKpi.totalCompletionCount,
+            unit: "명"
+          })}
           subValue={
             data.kpi.totalPrograms > 0
               ? `${formatNumber(data.kpi.totalPrograms)}개 교육 기준`
@@ -75,6 +147,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="평균 지표"
           title="회당 평균 수료자 수"
           value={`${formatNumber(data.kpi.averageCompletionPerProgram)}명`}
+          comparison={buildAverageComparisonText({
+            basisLabel: comparisonBasisLabel,
+            current: data.kpi.averageCompletionPerProgram,
+            average: comparisonKpi.averageCompletionPerProgram,
+            unit: "명"
+          })}
           subValue={
             data.kpi.totalPrograms > 0
               ? "교육 1건당 평균 수료자"
@@ -87,6 +165,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           eyebrow="운영 규모"
           title="총 교육시수"
           value={`${formatNumber(data.kpi.totalHours)}시간`}
+          comparison={buildTotalComparisonText({
+            basisLabel: comparisonBasisLabel,
+            current: data.kpi.totalHours,
+            total: comparisonKpi.totalHours,
+            unit: "시간"
+          })}
           subValue={
             data.kpi.totalPrograms > 0
               ? `회당 평균 ${formatNumber(data.kpi.averageHoursPerProgram)}시간`
