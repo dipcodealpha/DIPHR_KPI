@@ -28,9 +28,9 @@ const BAR_COLORS = [
   "#64748b",
   "#0f766e",
   "#0369a1",
-  "#6d28d9",
-  "#b45309",
-  "#be123c"
+  "#047857",
+  "#2563eb",
+  "#0891b2"
 ];
 
 export function ProjectBarChart({

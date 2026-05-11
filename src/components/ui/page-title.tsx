@@ -11,7 +11,7 @@ export function PageTitle({ title, description }: PageTitleProps) {
   return (
     <div className="mb-1 min-w-0">
       {title ? (
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-900">
+        <h2 className="text-xl font-semibold text-slate-900">
           {title}
         </h2>
       ) : null}

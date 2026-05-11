@@ -13,7 +13,7 @@ export function Sidebar() {
         <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
           Integrated Admin
         </div>
-        <div className="mt-2 text-xl font-semibold tracking-[-0.02em] text-white">
+        <div className="mt-2 text-xl font-semibold text-white">
           통합 관리도구
         </div>
         <div className="mt-1 text-sm leading-6 text-slate-300">

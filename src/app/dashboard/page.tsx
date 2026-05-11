@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { FolderPlus, Plus } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { DashboardFilters } from "@/components/dashboard/dashboard-filters";
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
@@ -104,80 +106,123 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <div className="space-y-6">
+      <header className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-semibold uppercase text-slate-500">
+              Dashboard
+            </div>
+            <h2 className="mt-2 text-2xl font-bold text-slate-950">
+              사업·교육 운영 현황
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              교육 운영 규모, 수료 성과, 사업별 흐름을 한 화면에서 확인하고 필요한 항목을 바로 관리합니다.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Link
+              href="/programs/new"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-slate-800"
+              style={{ color: "#ffffff" }}
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              교육 등록
+            </Link>
+            <Link
+              href="/projects/new"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              <FolderPlus className="h-4 w-4" aria-hidden="true" />
+              사업 등록
+            </Link>
+          </div>
+        </div>
+      </header>
+
       <DashboardFilters filters={data.filters} selected={data.selected} />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          eyebrow="운영 현황"
-          title="총 교육 수"
-          value={`${formatNumber(data.kpi.totalPrograms)}건`}
-          comparison={buildTotalComparisonText({
-            basisLabel: comparisonBasisLabel,
-            current: data.kpi.totalPrograms,
-            total: comparisonKpi.totalPrograms,
-            unit: "건"
-          })}
-          subValue={
-            data.kpi.totalProjects > 0
-              ? `${formatNumber(data.kpi.totalProjects)}개 사업 기준`
-              : "집계된 사업이 없습니다."
-          }
-          description="현재 선택된 필터 기준의 전체 교육 운영 건수"
-        />
+      <section className="space-y-4">
+        <div>
+          <div className="text-xs font-semibold uppercase text-slate-500">
+            SUMMARY
+          </div>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">핵심 지표</h2>
+        </div>
 
-        <KpiCard
-          eyebrow="성과 지표"
-          title="총 수료자 수"
-          value={`${formatNumber(data.kpi.totalCompletionCount)}명`}
-          comparison={buildTotalComparisonText({
-            basisLabel: comparisonBasisLabel,
-            current: data.kpi.totalCompletionCount,
-            total: comparisonKpi.totalCompletionCount,
-            unit: "명"
-          })}
-          subValue={
-            data.kpi.totalPrograms > 0
-              ? `${formatNumber(data.kpi.totalPrograms)}개 교육 기준`
-              : "집계된 교육이 없습니다."
-          }
-          description="현재 선택된 필터 기준의 누적 수료자 수"
-        />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <KpiCard
+            eyebrow="운영 현황"
+            title="총 교육 수"
+            value={`${formatNumber(data.kpi.totalPrograms)}건`}
+            comparison={buildTotalComparisonText({
+              basisLabel: comparisonBasisLabel,
+              current: data.kpi.totalPrograms,
+              total: comparisonKpi.totalPrograms,
+              unit: "건"
+            })}
+            subValue={
+              data.kpi.totalProjects > 0
+                ? `${formatNumber(data.kpi.totalProjects)}개 사업 기준`
+                : "집계된 사업이 없습니다."
+            }
+            description="현재 선택된 필터 기준의 전체 교육 운영 건수"
+          />
 
-        <KpiCard
-          eyebrow="평균 지표"
-          title="회당 평균 수료자 수"
-          value={`${formatNumber(data.kpi.averageCompletionPerProgram)}명`}
-          comparison={buildAverageComparisonText({
-            basisLabel: comparisonBasisLabel,
-            current: data.kpi.averageCompletionPerProgram,
-            average: comparisonKpi.averageCompletionPerProgram,
-            unit: "명"
-          })}
-          subValue={
-            data.kpi.totalPrograms > 0
-              ? "교육 1건당 평균 수료자"
-              : "계산 가능한 교육 데이터가 없습니다."
-          }
-          description="현재 선택된 필터 기준 총 수료자 수를 총 교육 수로 나눈 평균값"
-        />
+          <KpiCard
+            eyebrow="성과 지표"
+            title="총 수료자 수"
+            value={`${formatNumber(data.kpi.totalCompletionCount)}명`}
+            comparison={buildTotalComparisonText({
+              basisLabel: comparisonBasisLabel,
+              current: data.kpi.totalCompletionCount,
+              total: comparisonKpi.totalCompletionCount,
+              unit: "명"
+            })}
+            subValue={
+              data.kpi.totalPrograms > 0
+                ? `${formatNumber(data.kpi.totalPrograms)}개 교육 기준`
+                : "집계된 교육이 없습니다."
+            }
+            description="현재 선택된 필터 기준의 누적 수료자 수"
+          />
 
-        <KpiCard
-          eyebrow="운영 규모"
-          title="총 교육시수"
-          value={`${formatNumber(data.kpi.totalHours)}시간`}
-          comparison={buildTotalComparisonText({
-            basisLabel: comparisonBasisLabel,
-            current: data.kpi.totalHours,
-            total: comparisonKpi.totalHours,
-            unit: "시간"
-          })}
-          subValue={
-            data.kpi.totalPrograms > 0
-              ? `회당 평균 ${formatNumber(data.kpi.averageHoursPerProgram)}시간`
-              : "계산 가능한 교육 데이터가 없습니다."
-          }
-          description="현재 선택된 필터 기준의 누적 교육 시수"
-        />
+          <KpiCard
+            eyebrow="평균 지표"
+            title="회당 평균 수료자 수"
+            value={`${formatNumber(data.kpi.averageCompletionPerProgram)}명`}
+            comparison={buildAverageComparisonText({
+              basisLabel: comparisonBasisLabel,
+              current: data.kpi.averageCompletionPerProgram,
+              average: comparisonKpi.averageCompletionPerProgram,
+              unit: "명"
+            })}
+            subValue={
+              data.kpi.totalPrograms > 0
+                ? "교육 1건당 평균 수료자"
+                : "계산 가능한 교육 데이터가 없습니다."
+            }
+            description="현재 선택된 필터 기준 총 수료자 수를 총 교육 수로 나눈 평균값"
+          />
+
+          <KpiCard
+            eyebrow="운영 규모"
+            title="총 교육시수"
+            value={`${formatNumber(data.kpi.totalHours)}시간`}
+            comparison={buildTotalComparisonText({
+              basisLabel: comparisonBasisLabel,
+              current: data.kpi.totalHours,
+              total: comparisonKpi.totalHours,
+              unit: "시간"
+            })}
+            subValue={
+              data.kpi.totalPrograms > 0
+                ? `회당 평균 ${formatNumber(data.kpi.averageHoursPerProgram)}시간`
+                : "계산 가능한 교육 데이터가 없습니다."
+            }
+            description="현재 선택된 필터 기준의 누적 교육 시수"
+          />
+        </div>
       </section>
 
       <DashboardCharts charts={data.charts} selected={data.selected} />

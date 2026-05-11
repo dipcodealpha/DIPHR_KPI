@@ -144,97 +144,130 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
 
   const projectMeta = selected.projectId
     ? `선택 사업: ${selectedProjectName || "현재 선택됨"}`
-    : "클릭하여 사업 필터 적용";
+    : "사업 선택 없음";
 
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
-      <ChartCard
-        eyebrow="SUMMARY"
-        title="실시연도별 교육건수"
-        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 연도별 운영 건수로 집계합니다."
-        meta="보조 요약 차트"
-      >
-        {charts.byYear.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <SummaryBarChart data={charts.byYear} valueLabel="교육건수" />
-        )}
-      </ChartCard>
+    <div className="space-y-6">
+      <section className="space-y-4">
+        <div>
+          <div className="text-xs font-semibold uppercase text-slate-500">
+            SUMMARY
+          </div>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">연도별 요약</h2>
+        </div>
 
-      <ChartCard
-        eyebrow="SUMMARY"
-        title="실시연도별 수료자 수"
-        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 연도별 누적 수료자 수로 집계합니다."
-        meta="보조 요약 차트"
-      >
-        {charts.byYearParticipants.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <SummaryBarChart data={charts.byYearParticipants} valueLabel="수료자 수" />
-        )}
-      </ChartCard>
+        <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
+          <ChartCard
+            eyebrow="SUMMARY"
+            title="실시연도별 교육건수"
+            description="교육 시작일 기준으로 연도별 운영 건수를 집계합니다."
+            meta="교육건수"
+          >
+            {charts.byYear.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <SummaryBarChart data={charts.byYear} valueLabel="교육건수" />
+            )}
+          </ChartCard>
 
-      <ChartCard
-        eyebrow="TREND"
-        title="월별 교육건수"
-        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 월별 교육 건수로 집계합니다."
-        meta={currentSummary}
-      >
-        {charts.byMonthPrograms.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <TrendChart data={charts.byMonthPrograms} valueLabel="교육건수" />
-        )}
-      </ChartCard>
+          <ChartCard
+            eyebrow="SUMMARY"
+            title="실시연도별 수료자 수"
+            description="교육 시작일 기준으로 연도별 누적 수료자 수를 집계합니다."
+            meta="수료자 수"
+          >
+            {charts.byYearParticipants.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <SummaryBarChart data={charts.byYearParticipants} valueLabel="수료자 수" />
+            )}
+          </ChartCard>
+        </div>
+      </section>
 
-      <ChartCard
-        eyebrow="TREND"
-        title="월별 수료자 수"
-        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 월별 누적 수료자 수로 집계합니다."
-        meta={currentSummary}
-      >
-        {charts.byMonthCompletions.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <TrendChart data={charts.byMonthCompletions} valueLabel="수료자 수" />
-        )}
-      </ChartCard>
+      <section className="space-y-4">
+        <div>
+          <div className="text-xs font-semibold uppercase text-slate-500">
+            TREND
+          </div>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">월별 추이</h2>
+        </div>
 
-      <ChartCard
-        eyebrow="PROJECT"
-        title="사업별 교육건수"
-        description="운영 건수가 큰 순서대로 비교합니다. 같은 막대를 다시 클릭하면 사업 선택이 해제됩니다."
-        meta={projectMeta}
-      >
-        {charts.byProject.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <ProjectBarChart
-            data={charts.byProject}
-            valueLabel="교육건수"
-            selectedProjectId={selected.projectId}
-            onSelectProject={handleSelectProject}
-          />
-        )}
-      </ChartCard>
+        <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
+          <ChartCard
+            eyebrow="TREND"
+            title="월별 교육건수"
+            description="교육 시작일 기준으로 월별 교육 건수를 집계합니다."
+            meta={currentSummary}
+          >
+            {charts.byMonthPrograms.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <TrendChart data={charts.byMonthPrograms} valueLabel="교육건수" />
+            )}
+          </ChartCard>
 
-      <ChartCard
-        eyebrow="PROJECT"
-        title="사업별 수료자 수"
-        description="누적 수료자 수가 큰 순서대로 비교합니다. 같은 막대를 다시 클릭하면 사업 선택이 해제됩니다."
-        meta={projectMeta}
-      >
-        {charts.byProjectParticipants.length === 0 ? (
-          <EmptyChart />
-        ) : (
-          <ProjectBarChart
-            data={charts.byProjectParticipants}
-            valueLabel="수료자 수"
-            selectedProjectId={selected.projectId}
-            onSelectProject={handleSelectProject}
-          />
-        )}
-      </ChartCard>
+          <ChartCard
+            eyebrow="TREND"
+            title="월별 수료자 수"
+            description="교육 시작일 기준으로 월별 누적 수료자 수를 집계합니다."
+            meta={currentSummary}
+          >
+            {charts.byMonthCompletions.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <TrendChart data={charts.byMonthCompletions} valueLabel="수료자 수" />
+            )}
+          </ChartCard>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <div className="text-xs font-semibold uppercase text-slate-500">
+            PROJECT
+          </div>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">사업별 비교</h2>
+        </div>
+
+        <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
+          <ChartCard
+            eyebrow="PROJECT"
+            title="사업별 교육건수"
+            description="운영 건수가 큰 순서대로 비교합니다."
+            meta={projectMeta}
+          >
+            {charts.byProject.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <ProjectBarChart
+                data={charts.byProject}
+                valueLabel="교육건수"
+                selectedProjectId={selected.projectId}
+                onSelectProject={handleSelectProject}
+              />
+            )}
+          </ChartCard>
+
+          <ChartCard
+            eyebrow="PROJECT"
+            title="사업별 수료자 수"
+            description="누적 수료자 수가 큰 순서대로 비교합니다."
+            meta={projectMeta}
+          >
+            {charts.byProjectParticipants.length === 0 ? (
+              <EmptyChart />
+            ) : (
+              <ProjectBarChart
+                data={charts.byProjectParticipants}
+                valueLabel="수료자 수"
+                selectedProjectId={selected.projectId}
+                onSelectProject={handleSelectProject}
+              />
+            )}
+          </ChartCard>
+        </div>
+      </section>
     </div>
   );
 }

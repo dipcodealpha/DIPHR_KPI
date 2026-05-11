@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { isActivePath, navigationItems } from "@/components/layout/navigation-items";
 
 function getSectionLabel(pathname: string) {
@@ -78,8 +79,8 @@ export function Topbar() {
 
   return (
     <>
-      <header className="border-b border-slate-300 bg-white">
-        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-6 py-4 lg:px-8">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-start gap-3">
             <button
               type="button"
@@ -89,24 +90,24 @@ export function Topbar() {
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation-drawer"
             >
-              <span className="text-lg leading-none">≡</span>
+              <Menu className="h-5 w-5" aria-hidden="true" />
             </button>
 
             <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="text-xs font-semibold uppercase text-slate-500">
                 Administration
               </div>
-              <h1 className="mt-1 truncate text-xl font-semibold tracking-[-0.02em] text-slate-900">
+              <h1 className="mt-1 text-xl font-bold text-slate-950">
                 {title}
               </h1>
-              <p className="mt-1 truncate text-sm leading-6 text-slate-600">
+              <p className="mt-1 text-sm leading-5 text-slate-600">
                 {description}
               </p>
             </div>
           </div>
 
-          <div className="hidden rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-right lg:block">
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <div className="hidden rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-right lg:block">
+            <div className="text-xs font-semibold uppercase text-slate-500">
               운영 상태
             </div>
             <div className="mt-1 text-sm font-medium text-slate-700">
@@ -133,7 +134,7 @@ export function Topbar() {
           >
             <div className="flex items-start justify-between border-b border-slate-700 px-5 py-5">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <div className="text-xs font-semibold uppercase text-slate-400">
                   Integrated Admin
                 </div>
                 <div className="mt-2 text-lg font-semibold text-white">통합 관리도구</div>
@@ -145,12 +146,12 @@ export function Topbar() {
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-slate-800 hover:text-white"
                 aria-label="메뉴 닫기"
               >
-                <span className="text-base leading-none">×</span>
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
 
             <nav className="flex-1 px-4 py-6">
-              <div className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="mb-3 px-3 text-xs font-semibold uppercase text-slate-500">
                 메뉴
               </div>
 

@@ -16,26 +16,28 @@ export function ChartCard({
   children
 }: ChartCardProps) {
   return (
-    <section className="rounded-xl border border-slate-300 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <div className="text-xs font-semibold uppercase text-slate-500">
             {eyebrow}
           </div>
-          <h3 className="mt-2 text-base font-semibold text-slate-900">{title}</h3>
+          <h3 className="mt-1 text-base font-bold text-slate-950">{title}</h3>
           {description ? (
             <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
           ) : null}
         </div>
 
         {meta ? (
-          <div className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+          <div className="w-fit max-w-full rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
             {meta}
           </div>
         ) : null}
       </div>
 
-      <div className="relative h-[360px] min-h-[360px] w-full">{children}</div>
+      <div className="relative h-[300px] min-h-[300px] w-full sm:h-[340px] sm:min-h-[340px]">
+        {children}
+      </div>
     </section>
   );
 }
