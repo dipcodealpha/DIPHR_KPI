@@ -46,6 +46,16 @@ export interface DashboardProgramListItem {
   status: "예정" | "완료";
 }
 
+export interface DashboardProjectPortfolioItem {
+  id: string;
+  project_name: string;
+  project_year: number;
+  totalPrograms: number;
+  scheduledPrograms: number;
+  completedPrograms: number;
+  totalCompletionCount: number;
+}
+
 export interface DashboardAuditItem {
   id: string;
   target_type: string;
@@ -74,6 +84,9 @@ export interface DashboardData {
     byProjectParticipants: DashboardChartItem[];
     byMonthPrograms: DashboardChartItem[];
     byMonthCompletions: DashboardChartItem[];
+  };
+  portfolio: {
+    projects: DashboardProjectPortfolioItem[];
   };
   lists: {
     scheduled: DashboardProgramListItem[];
@@ -268,7 +281,7 @@ export async function getDashboardData(
 
   const filterProjects = projectOptionsSource.map((project) => ({
     id: project.id,
-    label: `${project.project_year} / ${project.project_name}`
+    label: project.project_name
   }));
 
   const filterManagers = Array.from(
@@ -301,6 +314,46 @@ export async function getDashboardData(
 
   const relatedProjectIds = new Set(filteredPrograms.map((program) => program.project_id));
   const filteredProgramIds = new Set(filteredPrograms.map((program) => program.id));
+
+  const projectPortfolioMap = new Map<string, DashboardProjectPortfolioItem>(
+    projectOptionsSource.map((project) => [
+      project.id,
+      {
+        id: project.id,
+        project_name: project.project_name,
+        project_year: project.project_year,
+        totalPrograms: 0,
+        scheduledPrograms: 0,
+        completedPrograms: 0,
+        totalCompletionCount: 0
+      }
+    ])
+  );
+
+  for (const program of filteredPrograms) {
+    const portfolioProject = projectPortfolioMap.get(program.project_id);
+
+    if (!portfolioProject) {
+      continue;
+    }
+
+    portfolioProject.totalPrograms += 1;
+    portfolioProject.totalCompletionCount += toNumber(program.completion_count);
+
+    if (program.completion_count === null) {
+      portfolioProject.scheduledPrograms += 1;
+    } else {
+      portfolioProject.completedPrograms += 1;
+    }
+  }
+
+  const projectPortfolio = Array.from(projectPortfolioMap.values()).sort(
+    (a, b) =>
+      b.totalPrograms - a.totalPrograms ||
+      b.totalCompletionCount - a.totalCompletionCount ||
+      b.project_year - a.project_year ||
+      a.project_name.localeCompare(b.project_name, "ko")
+  );
 
   const projectNameMap = new Map(
     projects.map((project) => [project.id, `${project.project_year} / ${project.project_name}`])
@@ -418,6 +471,9 @@ export async function getDashboardData(
     kpi,
     kpiComparison,
     charts,
+    portfolio: {
+      projects: projectPortfolio
+    },
     lists: {
       scheduled,
       completed,

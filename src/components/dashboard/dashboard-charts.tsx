@@ -151,14 +151,14 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <section className="space-y-4">
         <div>
           <div className="text-xs font-semibold uppercase text-slate-500">
-            SUMMARY
+            Portfolio Analytics
           </div>
-          <h2 className="mt-1 text-lg font-bold text-slate-950">연도별 요약</h2>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">연도별 운영 분포</h2>
         </div>
 
         <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
           <ChartCard
-            eyebrow="SUMMARY"
+            eyebrow="YEAR"
             title="실시연도별 교육건수"
             description="교육 시작일 기준으로 연도별 운영 건수를 집계합니다."
             meta="교육건수"
@@ -171,7 +171,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
           </ChartCard>
 
           <ChartCard
-            eyebrow="SUMMARY"
+            eyebrow="YEAR"
             title="실시연도별 수료자 수"
             description="교육 시작일 기준으로 연도별 누적 수료자 수를 집계합니다."
             meta="수료자 수"

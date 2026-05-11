@@ -68,9 +68,12 @@ function ProgramListSection({
       <div className="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase text-slate-500">
-            PROGRAM LIST
+            L3 Detail Readiness
           </div>
-          <h2 className="mt-1 text-lg font-bold text-slate-950">교육 목록</h2>
+          <h2 className="mt-1 text-lg font-bold text-slate-950">교육 실행 목록</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            현재 조건에 해당하는 교육의 상태, 수료자 수, 수정 진입점을 확인합니다.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -160,6 +163,9 @@ function AuditLogSection({ logs }: { logs: DashboardData["lists"]["recentAuditLo
             AUDIT LOG
           </div>
           <h2 className="mt-1 text-sm font-bold text-slate-800">최근 수정 목록 10건</h2>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            현재 조회 조건과 연관된 변경 이력을 낮은 우선순위로 확인합니다.
+          </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
@@ -219,4 +225,16 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
       <AuditLogSection logs={lists.recentAuditLogs} />
     </div>
   );
+}
+
+export function DashboardProgramList({ lists }: DashboardTablesProps) {
+  return <ProgramListSection scheduled={lists.scheduled} completed={lists.completed} />;
+}
+
+export function DashboardAuditLog({
+  logs
+}: {
+  logs: DashboardData["lists"]["recentAuditLogs"];
+}) {
+  return <AuditLogSection logs={logs} />;
 }
