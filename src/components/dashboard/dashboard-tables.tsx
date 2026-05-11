@@ -144,7 +144,7 @@ export function DashboardTables({ lists }: DashboardTablesProps) {
             최근 수정 목록 10건
           </h3>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            현재 조건과 연관된 사업 및 교육의 최근 변경 이력입니다.
+            최근 변경 이력 50건을 조회한 뒤, 현재 조건과 연관된 사업 및 교육 10건을 표시합니다.
           </p>
         </div>
 

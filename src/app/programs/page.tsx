@@ -13,7 +13,10 @@ interface ProgramsPageProps {
   searchParams?: Promise<{
     success?: string;
     q?: string;
+    year?: string;
     project?: string;
+    status?: string;
+    manager?: string;
   }>;
 }
 
@@ -33,7 +36,10 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const successMessage = getSuccessMessage(resolvedSearchParams.success);
   const keyword = resolvedSearchParams.q?.trim() ?? "";
+  const selectedYear = resolvedSearchParams.year?.trim() ?? "";
   const selectedProject = resolvedSearchParams.project?.trim() ?? "";
+  const selectedStatus = resolvedSearchParams.status?.trim() ?? "";
+  const selectedManager = resolvedSearchParams.manager?.trim() ?? "";
 
   let programs;
 
@@ -60,8 +66,38 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
     )
   ).sort((a, b) => a.localeCompare(b, "ko"));
 
+  const yearOptions = Array.from(
+    new Set(
+      programs
+        .map((program) => program.project_year)
+        .filter((year): year is number => typeof year === "number" && Number.isFinite(year))
+    )
+  ).sort((a, b) => b - a);
+
+  const managerOptions = Array.from(
+    new Set(
+      programs
+        .map((program) => program.manager_name.trim())
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b, "ko"));
+
+  const statusOptions = ["예정", "완료"];
+
   const filteredPrograms = programs.filter((program) => {
+    if (selectedYear && String(program.project_year ?? "") !== selectedYear) {
+      return false;
+    }
+
     if (selectedProject && program.project_name !== selectedProject) {
+      return false;
+    }
+
+    if (selectedStatus && getProgramStatus(program.completion_count) !== selectedStatus) {
+      return false;
+    }
+
+    if (selectedManager && program.manager_name !== selectedManager) {
       return false;
     }
 
@@ -112,7 +148,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
   ]);
 
   const csvDownloadUrl = buildDataUrl(csv);
-  const hasFilter = Boolean(keyword || selectedProject);
+  const hasFilter = Boolean(keyword || selectedYear || selectedProject || selectedStatus || selectedManager);
 
   return (
     <div className="space-y-6">
@@ -142,7 +178,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
 
       <form className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="grid w-full gap-3 md:grid-cols-2 lg:max-w-2xl">
+          <div className="grid w-full gap-3 md:grid-cols-2 xl:grid-cols-5">
             <div className="space-y-2">
               <label htmlFor="program-search" className="text-sm font-medium text-slate-700">
                 교육 검색
@@ -154,6 +190,25 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
                 placeholder="교육명, 사업명, 담당자명으로 검색"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="program-year" className="text-sm font-medium text-slate-700">
+                사업연도
+              </label>
+              <select
+                id="program-year"
+                name="year"
+                defaultValue={selectedYear}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
+              >
+                <option value="">전체 연도</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
@@ -170,6 +225,44 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
                 {projectOptions.map((projectName) => (
                   <option key={projectName} value={projectName}>
                     {projectName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="program-status" className="text-sm font-medium text-slate-700">
+                상태
+              </label>
+              <select
+                id="program-status"
+                name="status"
+                defaultValue={selectedStatus}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
+              >
+                <option value="">전체 상태</option>
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="program-manager" className="text-sm font-medium text-slate-700">
+                담당자
+              </label>
+              <select
+                id="program-manager"
+                name="manager"
+                defaultValue={selectedManager}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"
+              >
+                <option value="">전체 담당자</option>
+                {managerOptions.map((manager) => (
+                  <option key={manager} value={manager}>
+                    {manager}
                   </option>
                 ))}
               </select>
@@ -199,7 +292,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
           title={hasFilter ? "검색 결과가 없습니다." : "등록된 교육이 없습니다."}
           message={
             hasFilter
-              ? "검색어 또는 사업 선택을 바꾸거나 초기화 후 다시 확인해 주세요."
+              ? "검색어 또는 필터 조건을 바꾸거나 초기화 후 다시 확인해 주세요."
               : "먼저 활성 사업이 있는지 확인한 뒤 우측 상단의 교육 등록 버튼으로 첫 교육을 추가해 주세요."
           }
         />

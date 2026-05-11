@@ -179,7 +179,8 @@ export function ProgramForm({
 
           {duplicateMessage ? (
             <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              중복 경고: {duplicateMessage} 등록은 가능하지만 기존 교육과 중복 여부를 확인해 주세요.
+              중복 경고: {duplicateMessage} 중복 기준은 동일 사업·동일 교육명·동일 시작일입니다.
+              등록은 차단되지 않으므로 실제로 다른 회차인지 확인한 뒤 저장해 주세요.
             </div>
           ) : null}
 
@@ -259,7 +260,11 @@ export function ProgramForm({
           onChange={(event) => setCompletionCount(event.target.value)}
           className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
           placeholder="비워두면 예정"
+          aria-describedby="program-form-completion-help"
         />
+        <p id="program-form-completion-help" className="text-xs leading-5 text-slate-500">
+          비워두면 예정 교육으로 표시됩니다. 0을 입력하면 완료 교육이며 수료자 0명으로 집계됩니다.
+        </p>
       </div>
 
       <div className="space-y-2">

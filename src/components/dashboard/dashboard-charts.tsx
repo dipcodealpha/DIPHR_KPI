@@ -151,7 +151,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <ChartCard
         eyebrow="SUMMARY"
         title="실시연도별 교육건수"
-        description="교육 시작일 기준 연도별 운영 건수 요약"
+        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 연도별 운영 건수로 집계합니다."
         meta="보조 요약 차트"
       >
         {charts.byYear.length === 0 ? (
@@ -164,7 +164,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <ChartCard
         eyebrow="SUMMARY"
         title="실시연도별 수료자 수"
-        description="교육 시작일 기준 연도별 누적 수료자 수 요약"
+        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 연도별 누적 수료자 수로 집계합니다."
         meta="보조 요약 차트"
       >
         {charts.byYearParticipants.length === 0 ? (
@@ -177,7 +177,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <ChartCard
         eyebrow="TREND"
         title="월별 교육건수"
-        description="사업연도 조건에 해당하는 교육의 시작일 기준 월별 교육 건수"
+        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 월별 교육 건수로 집계합니다."
         meta={currentSummary}
       >
         {charts.byMonthPrograms.length === 0 ? (
@@ -190,7 +190,7 @@ export function DashboardCharts({ charts, selected }: DashboardChartsProps) {
       <ChartCard
         eyebrow="TREND"
         title="월별 수료자 수"
-        description="사업연도 조건에 해당하는 교육의 시작일 기준 월별 누적 수료자 수"
+        description="사업연도 등 현재 필터를 적용한 뒤, 교육 시작일 기준 월별 누적 수료자 수로 집계합니다."
         meta={currentSummary}
       >
         {charts.byMonthCompletions.length === 0 ? (
