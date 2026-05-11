@@ -1,13 +1,14 @@
 import { AccessForm } from "@/components/access/access-form";
 
 interface AccessPageProps {
-  searchParams?: {
+  searchParams?: Promise<{
     redirect?: string;
-  };
+  }>;
 }
 
-export default function AccessPage({ searchParams }: AccessPageProps) {
-  const redirectTo = searchParams?.redirect || "/dashboard";
+export default async function AccessPage({ searchParams }: AccessPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const redirectTo = resolvedSearchParams.redirect || "/dashboard";
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-16">
