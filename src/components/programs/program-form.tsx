@@ -5,6 +5,7 @@ import type { ProjectOption } from "@/types";
 import { SubmitButton } from "@/components/ui/submit-button";
 
 type ProgramFormMode = "create" | "edit";
+type CompletionStatus = "scheduled" | "completed";
 
 interface ProgramFormValues {
   id?: string;
@@ -51,6 +52,11 @@ export function ProgramForm({
       ? ""
       : String(defaultValues.completion_count)
   );
+  const [completionStatus, setCompletionStatus] = useState<CompletionStatus>(
+    defaultValues?.completion_count === null || defaultValues?.completion_count === undefined
+      ? "scheduled"
+      : "completed"
+  );
   const [managerName, setManagerName] = useState(defaultValues?.manager_name ?? "");
   const [createdByName, setCreatedByName] = useState(defaultValues?.created_by_name ?? "");
   const [updatedByName, setUpdatedByName] = useState(defaultValues?.updated_by_name ?? "");
@@ -66,6 +72,16 @@ export function ProgramForm({
 
     return new Date(endDate).getTime() < new Date(startDate).getTime();
   }, [startDate, endDate]);
+
+  const isCompleted = completionStatus === "completed";
+
+  const handleCompletionStatusChange = (nextStatus: CompletionStatus) => {
+    setCompletionStatus(nextStatus);
+
+    if (nextStatus === "scheduled") {
+      setCompletionCount("");
+    }
+  };
 
   useEffect(() => {
     const shouldCheck = projectId && programName.trim() && startDate;
@@ -129,6 +145,13 @@ export function ProgramForm({
       {mode === "edit" && defaultValues?.id ? (
         <input type="hidden" name="id" value={defaultValues.id} />
       ) : null}
+
+      <div className="md:col-span-2 border-b border-slate-200 pb-2">
+        <h2 className="text-base font-semibold text-slate-900">교육 기본정보</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          사업, 교육명, 기간, 시수와 담당자 정보를 입력합니다.
+        </p>
+      </div>
 
       <div className="space-y-2 md:col-span-2">
         <label className="text-sm font-medium text-slate-700">사업 선택</label>
@@ -249,8 +272,52 @@ export function ProgramForm({
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">수료자수</label>
+      <div className="space-y-4 md:col-span-2">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">운영상태 / 완료 처리</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              예정 교육은 수료자수를 비워 저장하고, 완료 교육은 수료자수를 입력해 저장합니다.
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2" role="radiogroup" aria-label="교육 운영상태">
+            <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-300 bg-white p-4 text-sm transition has-[:checked]:border-slate-900 has-[:checked]:ring-2 has-[:checked]:ring-slate-900/10">
+              <input
+                type="radio"
+                name="completion_status"
+                value="scheduled"
+                checked={completionStatus === "scheduled"}
+                onChange={() => handleCompletionStatusChange("scheduled")}
+                className="mt-1 h-4 w-4"
+              />
+              <span>
+                <span className="block font-semibold text-slate-900">예정 교육</span>
+                <span className="mt-1 block leading-6 text-slate-600">
+                  수료자수는 입력하지 않으며, 예정으로 표시됩니다.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-300 bg-white p-4 text-sm transition has-[:checked]:border-slate-900 has-[:checked]:ring-2 has-[:checked]:ring-slate-900/10">
+              <input
+                type="radio"
+                name="completion_status"
+                value="completed"
+                checked={completionStatus === "completed"}
+                onChange={() => handleCompletionStatusChange("completed")}
+                className="mt-1 h-4 w-4"
+              />
+              <span>
+                <span className="block font-semibold text-slate-900">완료 교육</span>
+                <span className="mt-1 block leading-6 text-slate-600">
+                  수료자수를 0명 이상 입력합니다. 0명도 완료 교육으로 집계됩니다.
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <input
           name="completion_count"
           type="number"
@@ -258,12 +325,16 @@ export function ProgramForm({
           step={1}
           value={completionCount}
           onChange={(event) => setCompletionCount(event.target.value)}
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-          placeholder="비워두면 예정"
+          disabled={!isCompleted}
+          required={isCompleted}
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+          placeholder={isCompleted ? "0 이상의 수료자수" : "예정 교육은 수료자수를 입력하지 않습니다"}
           aria-describedby="program-form-completion-help"
         />
         <p id="program-form-completion-help" className="text-xs leading-5 text-slate-500">
-          비워두면 예정 교육으로 표시됩니다. 0을 입력하면 완료 교육이며 수료자 0명으로 집계됩니다.
+          {isCompleted
+            ? "완료 교육으로 저장하면 입력한 숫자가 KPI와 수료자수 집계에 반영됩니다."
+            : "수료자수는 입력하지 않으며, 저장 후 상태는 예정으로 표시됩니다."}
         </p>
       </div>
 
